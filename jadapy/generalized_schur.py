@@ -87,6 +87,9 @@ def _is_target(target, target_type):
     return target == target_type or isinstance(target, target_type)
 
 def _get_ev(a, b, i):
+    if numpy.iscomplexobj(a):
+        return a[i, i] / b[i, i]
+
     n = a.shape[0]
     if i > 0 and a[i, i - 1] != 0:
         return scipy.linalg.eig(a[i-1:i+1, i-1:i+1], b[i-1:i+1, i-1:i+1])[0][1]
