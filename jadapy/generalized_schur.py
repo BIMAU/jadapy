@@ -108,7 +108,7 @@ def _select(start, end, a, b, target):
     elif _is_target(target, Target.LargestImaginaryPart):
         idx = max(idx_list, key=lambda i: _get_ev(a, b, i).imag)
     elif _is_target(target, Target.Target):
-        idx = min(idx_list, key=lambda i: abs(_get_ev(a, b, i) - target))
+        idx = min(idx_list, key=lambda i: abs(_get_ev(a, b, i) - target.target))
     return idx
 
 def generalized_schur_sort(a, b, q, z, target):
