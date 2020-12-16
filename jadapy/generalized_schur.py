@@ -7,6 +7,8 @@ from jadapy import Target
 
 _double_precision = ['i', 'l', 'd']
 
+__all__ = ['generalized_schur', 'generalized_schur_sort']
+
 def generalized_schur(a, b, output='real', lwork=None, overwrite_a=False, overwrite_b=False, sort=None,
                       check_finite=True):
 
