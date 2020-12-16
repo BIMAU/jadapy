@@ -84,22 +84,31 @@ def generalized_schur(a, b, output='real', lwork=None, overwrite_a=False, overwr
 def _is_target(target, target_type):
     return target == target_type or isinstance(target, target_type)
 
+def _get_ev(a, b, i):
+    n = a.shape[0]
+    if i > 0 and a[i, i - 1] != 0:
+        return scipy.linalg.eig(a[i-1:i+1, i-1:i+1], b[i-1:i+1, i-1:i+1])[0][1]
+    elif i < n - 1 and a[i + 1, i] != 0:
+        return scipy.linalg.eig(a[i:i+2, i:i+2], b[i:i+2, i:i+2])[0][0]
+    return a[i, i] / b[i, i]
+
 def _select(start, end, a, b, target):
-    idx = range(start, end)
+    idx = -1
+    idx_list = range(start, end)
     if _is_target(target, Target.SmallestMagnitude):
-        idx = min(idx, key=lambda i: abs(a[i, i] / b[i, i]))
+        idx = min(idx_list, key=lambda i: abs(_get_ev(a, b, i)))
     elif _is_target(target, Target.LargestMagnitude):
-        idx = max(idx, key=lambda i: abs(a[i, i] / b[i, i]))
+        idx = max(idx_list, key=lambda i: abs(_get_ev(a, b, i)))
     elif _is_target(target, Target.SmallestRealPart):
-        idx = min(idx, key=lambda i: a[i, i].real / b[i, i].real)
+        idx = min(idx_list, key=lambda i: _get_ev(a, b, i).real)
     elif _is_target(target, Target.LargestRealPart):
-        idx = max(idx, key=lambda i: a[i, i].real / b[i, i].real)
+        idx = max(idx_list, key=lambda i: _get_ev(a, b, i).real)
     elif _is_target(target, Target.SmallestImaginaryPart):
-        idx = min(idx, key=lambda i: a[i, i].imag / b[i, i].imag)
+        idx = min(idx_list, key=lambda i: _get_ev(a, b, i).imag)
     elif _is_target(target, Target.LargestImaginaryPart):
-        idx = max(idx, key=lambda i: a[i, i].imag / b[i, i].imag)
+        idx = max(idx_list, key=lambda i: _get_ev(a, b, i).imag)
     elif _is_target(target, Target.Target):
-        idx = min(idx, key=lambda i: abs(a[i, i] / b[i, i] - target))
+        idx = min(idx_list, key=lambda i: abs(_get_ev(a, b, i) - target))
     return idx
 
 def generalized_schur_sort(a, b, q, z, target):
