@@ -84,7 +84,10 @@ def generalized_schur(a, b, output='real', lwork=None, overwrite_a=False, overwr
         return result[0], result[1], result[-4], result[-3], result[2]
 
 def _is_target(target, target_type):
-    return target == target_type or isinstance(target, target_type)
+    try:
+        return target == target_type or isinstance(target, target_type)
+    except TypeError:
+        return False
 
 def _get_ev(a, b, i):
     if numpy.iscomplexobj(a):
