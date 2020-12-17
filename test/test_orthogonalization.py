@@ -50,3 +50,11 @@ def test_orthogonalization_multiple_vectors():
     orthogonalization.orthonormalize(x)
     assert x[:, 1].dot(x[:, 3]) == pytest.approx(0)
     assert norm(x) > 1
+
+def test_orthogonalization_no_vectors():
+    n = 20
+    x = numpy.ndarray(())
+
+    y = numpy.random.rand(n)
+    orthogonalization.orthogonalize(x, y)
+    assert norm(y) > 1
