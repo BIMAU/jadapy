@@ -4,9 +4,9 @@ from numpy.linalg import norm
 
 def _proj(x, y):
     try:
-        y -= x * x.dot(y)
+        y -= x * x.conj().dot(y)
     except ValueError:
-        y -= x @ (x.T @ y)
+        y -= x @ (x.T.conj() @ y)
 
 def DGKS(V, w):
     if V.ndim > 1 and V.shape[1] < 1:

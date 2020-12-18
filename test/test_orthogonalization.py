@@ -3,58 +3,85 @@ import pytest
 import numpy
 from numpy.linalg import norm
 
+from numpy.testing import assert_equal, assert_allclose
+
 from jadapy import orthogonalization
 
-def test_normalization():
+REAL_DTYPES = [numpy.float32, numpy.float64]
+COMPLEX_DTYPES = [numpy.complex64, numpy.complex128]
+DTYPES = REAL_DTYPES + COMPLEX_DTYPES
+
+def generate_random_dtype_array(shape, dtype):
+    if dtype in COMPLEX_DTYPES:
+        return (numpy.random.rand(*shape)
+                + numpy.random.rand(*shape) * 1.0j).astype(dtype)
+    return numpy.random.rand(*shape).astype(dtype)
+
+def dot(x, y):
+    return x.T.conj() @ y
+
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_normalization(dtype):
+    atol = numpy.finfo(dtype).eps * 100
     n = 20
-    x = numpy.random.rand(n)
+    x = generate_random_dtype_array([n], dtype)
     assert norm(x) > 1
     orthogonalization.normalize(x)
-    assert norm(x) == pytest.approx(1)
+    assert_allclose(norm(x), 1, rtol=0, atol=atol)
 
-def test_orthonormalization():
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_orthonormalization(dtype):
+    atol = numpy.finfo(dtype).eps * 100
     n = 20
-    x = numpy.random.rand(n)
+    x = generate_random_dtype_array([n], dtype)
     orthogonalization.normalize(x)
 
-    y = numpy.random.rand(n)
+    y = generate_random_dtype_array([n], dtype)
     orthogonalization.orthonormalize(x, y)
-    assert x.dot(y) == pytest.approx(0)
-    assert norm(y) == pytest.approx(1)
+    assert_allclose(dot(x, y), 0, rtol=0, atol=atol)
+    assert_allclose(norm(y), 1, rtol=0, atol=atol)
 
-def test_orthonormalization_multiple_vectors():
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_orthonormalization_multiple_vectors(dtype):
+    atol = numpy.finfo(dtype).eps * 100
     n = 20
     k = 5
-    x = numpy.random.rand(n, k)
+    x = generate_random_dtype_array([n, k], dtype)
     orthogonalization.orthonormalize(x)
 
-    y = numpy.random.rand(n)
+    y = generate_random_dtype_array([n], dtype)
     orthogonalization.orthogonalize(x, y)
     for i in range(k):
-        assert x[:, i].dot(y) == pytest.approx(0)
+        assert_allclose(dot(x[:, i], y), 0, rtol=0, atol=atol)
 
-def test_orthogonalization():
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_orthogonalization(dtype):
+    atol = numpy.finfo(dtype).eps * 100
     n = 20
-    x = numpy.random.rand(n)
+    x = generate_random_dtype_array([n], dtype)
     orthogonalization.normalize(x)
 
-    y = numpy.random.rand(n)
+    y = generate_random_dtype_array([n], dtype)
     orthogonalization.orthogonalize(x, y)
-    assert x.dot(y) == pytest.approx(0)
+    assert_allclose(dot(x, y), 0, rtol=0, atol=atol)
     assert norm(y) > 1
 
-def test_orthogonalization_multiple_vectors():
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_orthogonalization_multiple_vectors(dtype):
+    atol = numpy.finfo(dtype).eps * 100
     n = 20
     k = 5
-    x = numpy.random.rand(n, k)
+    x = generate_random_dtype_array([n, k], dtype)
     orthogonalization.orthonormalize(x)
-    assert x[:, 1].dot(x[:, 3]) == pytest.approx(0)
+    assert_allclose(dot(x[:, 1], x[:, 3]), 0, rtol=0, atol=atol)
     assert norm(x) > 1
 
-def test_orthogonalization_no_vectors():
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_orthogonalization_no_vectors(dtype):
+    atol = numpy.finfo(dtype).eps * 100
     n = 20
     x = numpy.ndarray(())
 
-    y = numpy.random.rand(n)
+    y = generate_random_dtype_array([n], dtype)
     orthogonalization.orthogonalize(x, y)
     assert norm(y) > 1
