@@ -2,9 +2,7 @@ import pytest
 import numpy
 import scipy
 
-from numpy.testing import (assert_equal, assert_array_almost_equal, assert_,
-                           assert_allclose, assert_almost_equal,
-                           assert_array_equal)
+from numpy.testing import assert_equal, assert_allclose
 
 from jadapy import generalized_schur
 from jadapy import Target
@@ -16,17 +14,17 @@ DTYPES = REAL_DTYPES + COMPLEX_DTYPES
 def generate_random_dtype_array(shape, dtype):
     if dtype in COMPLEX_DTYPES:
         return (numpy.random.rand(*shape)
-                + numpy.random.rand(*shape)*1.0j).astype(dtype)
+                + numpy.random.rand(*shape) * 1.0j).astype(dtype)
     return numpy.random.rand(*shape).astype(dtype)
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_generalized_schur(dtype):
     n = 20
-    a = generate_random_dtype_array([n, n], dtype=dtype)
-    b = generate_random_dtype_array([n, n], dtype=dtype)
+    a = generate_random_dtype_array([n, n], dtype)
+    b = generate_random_dtype_array([n, n], dtype)
     s, t, q, z = generalized_schur.generalized_schur(a, b)
 
-    atol = numpy.finfo(dtype).eps*100
+    atol = numpy.finfo(dtype).eps * 100
     assert_allclose(q @ s @ z.conj().T, a, rtol=0, atol=atol)
     assert_allclose(q @ t @ z.conj().T, b, rtol=0, atol=atol)
 
@@ -40,10 +38,10 @@ def _get_ev(a, b, i):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_generalized_schur_sort_smallest_magnitude(dtype):
-    atol = numpy.finfo(dtype).eps*100
+    atol = numpy.finfo(dtype).eps * 100
     n = 10
-    a = generate_random_dtype_array([n, n], dtype=dtype)
-    b = generate_random_dtype_array([n, n], dtype=dtype)
+    a = generate_random_dtype_array([n, n], dtype)
+    b = generate_random_dtype_array([n, n], dtype)
     s, t, q, z = generalized_schur.generalized_schur(a, b)
 
     idx = min(range(n), key=lambda i: abs(_get_ev(s, t, i)))
@@ -62,10 +60,10 @@ def test_generalized_schur_sort_smallest_magnitude(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_generalized_schur_sort_largest_magnitude(dtype):
-    atol = numpy.finfo(dtype).eps*100
+    atol = numpy.finfo(dtype).eps * 100
     n = 10
-    a = generate_random_dtype_array([n, n], dtype=dtype)
-    b = generate_random_dtype_array([n, n], dtype=dtype)
+    a = generate_random_dtype_array([n, n], dtype)
+    b = generate_random_dtype_array([n, n], dtype)
     s, t, q, z = generalized_schur.generalized_schur(a, b)
 
     idx = max(range(n), key=lambda i: abs(_get_ev(s, t, i)))
@@ -83,10 +81,10 @@ def test_generalized_schur_sort_largest_magnitude(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_generalized_schur_sort_smallest_real(dtype):
-    atol = numpy.finfo(dtype).eps*100
+    atol = numpy.finfo(dtype).eps * 100
     n = 10
-    a = generate_random_dtype_array([n, n], dtype=dtype)
-    b = generate_random_dtype_array([n, n], dtype=dtype)
+    a = generate_random_dtype_array([n, n], dtype)
+    b = generate_random_dtype_array([n, n], dtype)
     s, t, q, z = generalized_schur.generalized_schur(a, b)
 
     idx = min(range(n), key=lambda i: _get_ev(s, t, i).real)
@@ -104,10 +102,10 @@ def test_generalized_schur_sort_smallest_real(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_generalized_schur_sort_largest_real(dtype):
-    atol = numpy.finfo(dtype).eps*100
+    atol = numpy.finfo(dtype).eps * 100
     n = 10
-    a = generate_random_dtype_array([n, n], dtype=dtype)
-    b = generate_random_dtype_array([n, n], dtype=dtype)
+    a = generate_random_dtype_array([n, n], dtype)
+    b = generate_random_dtype_array([n, n], dtype)
     s, t, q, z = generalized_schur.generalized_schur(a, b)
 
     idx = max(range(n), key=lambda i: _get_ev(s, t, i).real)
@@ -125,10 +123,10 @@ def test_generalized_schur_sort_largest_real(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_generalized_schur_sort_smallest_imag(dtype):
-    atol = numpy.finfo(dtype).eps*100
+    atol = numpy.finfo(dtype).eps * 100
     n = 10
-    a = generate_random_dtype_array([n, n], dtype=dtype)
-    b = generate_random_dtype_array([n, n], dtype=dtype)
+    a = generate_random_dtype_array([n, n], dtype)
+    b = generate_random_dtype_array([n, n], dtype)
     s, t, q, z = generalized_schur.generalized_schur(a, b)
 
     idx = min(range(n), key=lambda i: _get_ev(s, t, i).imag)
@@ -146,10 +144,10 @@ def test_generalized_schur_sort_smallest_imag(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_generalized_schur_sort_largest_imag(dtype):
-    atol = numpy.finfo(dtype).eps*100
+    atol = numpy.finfo(dtype).eps * 100
     n = 10
-    a = generate_random_dtype_array([n, n], dtype=dtype)
-    b = generate_random_dtype_array([n, n], dtype=dtype)
+    a = generate_random_dtype_array([n, n], dtype)
+    b = generate_random_dtype_array([n, n], dtype)
     s, t, q, z = generalized_schur.generalized_schur(a, b)
 
     idx = max(range(n), key=lambda i: _get_ev(s, t, i).imag)
@@ -167,10 +165,10 @@ def test_generalized_schur_sort_largest_imag(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_generalized_schur_sort_target(dtype):
-    atol = numpy.finfo(dtype).eps*100
+    atol = numpy.finfo(dtype).eps * 100
     n = 10
-    a = generate_random_dtype_array([n, n], dtype=dtype)
-    b = generate_random_dtype_array([n, n], dtype=dtype)
+    a = generate_random_dtype_array([n, n], dtype)
+    b = generate_random_dtype_array([n, n], dtype)
     s, t, q, z = generalized_schur.generalized_schur(a, b)
 
     target = Target.Target(complex(2, 2))
