@@ -35,6 +35,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8,
     m = 0 # Size of the search subspace
 
     dtype = A.dtype
+    ctype = numpy.dtype(dtype.char.upper())
 
     if testspace == 'Harmonic Petrov':
         gamma = sqrt(1 + abs(target) ** 2)
@@ -45,33 +46,33 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8,
         nu = conj(target) / gamma
         mu = 1 / gamma
 
-    aconv = numpy.zeros(num, dtype)
-    bconv = numpy.zeros(num, dtype)
+    aconv = numpy.zeros(num, ctype)
+    bconv = numpy.zeros(num, ctype)
 
     # Generalized Schur vectors
-    Q = numpy.zeros((n, num), dtype)
-    Z = numpy.zeros((n, num), dtype)
-    QZ = numpy.zeros((num, num), dtype)
+    Q = numpy.zeros((n, num), ctype)
+    Z = numpy.zeros((n, num), ctype)
+    QZ = numpy.zeros((num, num), ctype)
     # Orthonormal search subspace
-    V = numpy.zeros((n, subspace_dimensions[1]), dtype)
+    V = numpy.zeros((n, subspace_dimensions[1]), ctype)
     # Orthonormal test subspace
-    W = numpy.zeros((n, subspace_dimensions[1]), dtype)
+    W = numpy.zeros((n, subspace_dimensions[1]), ctype)
     # Preconditioned orthonormal search subspace
-    Y = numpy.zeros((n, subspace_dimensions[1]), dtype)
+    Y = numpy.zeros((n, subspace_dimensions[1]), ctype)
     # AV = A*V without orthogonalization
-    AV = numpy.zeros((n, subspace_dimensions[1]), dtype)
+    AV = numpy.zeros((n, subspace_dimensions[1]), ctype)
     # BV = B*V without orthogonalization
-    BV = numpy.zeros((n, subspace_dimensions[1]), dtype)
+    BV = numpy.zeros((n, subspace_dimensions[1]), ctype)
 
     # Low-dimensional projections: WAV = W'*A*V, WBV = W'*B*V
-    WAV = numpy.zeros((subspace_dimensions[1], subspace_dimensions[1]), dtype)
-    WBV = numpy.zeros((subspace_dimensions[1], subspace_dimensions[1]), dtype)
+    WAV = numpy.zeros((subspace_dimensions[1], subspace_dimensions[1]), ctype)
+    WBV = numpy.zeros((subspace_dimensions[1], subspace_dimensions[1]), ctype)
 
     while k < num and it <= maxit:
         solver_tolerance /= 2
 
         if it == 1:
-            V[:, 0] = generate_random_dtype_array([n], dtype)
+            V[:, 0] = generate_random_dtype_array([n], ctype)
         else:
             V[:, m] = solve_generalized_correction_equation(A, B, prec, Q[:, 0:k+1], Y[:, 0:k+1], QZ[0:k+1, 0:k+1],
                                                             alpha, beta, r, solver_tolerance)

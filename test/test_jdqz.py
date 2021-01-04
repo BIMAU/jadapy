@@ -19,17 +19,21 @@ def generate_random_dtype_array(shape, dtype):
                 + numpy.random.rand(*shape) * 1.0j).astype(dtype)
     return numpy.random.rand(*shape).astype(dtype)
 
-@pytest.mark.parametrize('dtype', COMPLEX_DTYPES)
+@pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqz(dtype):
-    atol = numpy.finfo(dtype).eps * 100
-    n = 10
+    numpy.random.seed(1234)
+    atol = numpy.finfo(dtype).eps * 1000
+    n = 20
     k = 5
     a = generate_random_dtype_array([n, n], dtype)
     b = generate_random_dtype_array([n, n], dtype)
 
     alpha, beta = jdqz.jdqz(a, b, num=k, tol=atol)
+    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: abs(x)))
 
     eigs = scipy.linalg.eig(a, b, right=False, left=False)
+    eigs = numpy.array(sorted(eigs, key=lambda x: abs(x)))
+    eigs = eigs[:k]
 
-    eigs = sorted(eigs, key=lambda x: abs(x))
-    assert_allclose(alpha / beta, eigs[0:k], rtol=0, atol=atol)
+    assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
