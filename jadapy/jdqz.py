@@ -124,11 +124,12 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8,
             QZ[k, k] = dot(Q[:, k], Y[:, k])
 
             rnorm = norm(r)
-            print("Residual norm in step %d: %e" % (it, rnorm))
+            ev_est = alpha / beta
+            print("Step: %4d, eigenvalue estimate: %13.6e + %13.6ei, residual norm: %e" % (it, ev_est.real, ev_est.imag, rnorm))
 
             # Store converged Petrov num
             if rnorm <= tol:
-                print("Found an eigenvalue:", alpha / beta)
+                print("Found an eigenvalue:", ev_est)
 
                 aconv[k] = alpha
                 bconv[k] = beta
