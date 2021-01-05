@@ -118,7 +118,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8,
             r = beta * A @ Q[:, k] - alpha * B @ Q[:, k]
             orthogonalize(Z[:, 0:k+1], r)
 
-            for i in range(k - 1):
+            for i in range(k):
                 QZ[i, k] = dot(Q[:, i], Y[:, k])
                 QZ[k, i] = dot(Q[:, k], Y[:, i])
             QZ[k, k] = dot(Q[:, k], Y[:, k])
