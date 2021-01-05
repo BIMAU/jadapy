@@ -20,19 +20,147 @@ def generate_random_dtype_array(shape, dtype):
     return numpy.random.rand(*shape).astype(dtype)
 
 @pytest.mark.parametrize('dtype', DTYPES)
-def test_jdqz(dtype):
+def test_jdqz__smallest_magnitude(dtype):
     numpy.random.seed(1234)
-    atol = numpy.finfo(dtype).eps * 1000
+    tol = numpy.finfo(dtype).eps * 100
+    atol = tol * 10
     n = 20
     k = 5
     a = generate_random_dtype_array([n, n], dtype)
     b = generate_random_dtype_array([n, n], dtype)
 
-    alpha, beta = jdqz.jdqz(a, b, num=k, tol=atol)
+    alpha, beta = jdqz.jdqz(a, b, num=k, tol=tol)
     jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: abs(x)))
 
     eigs = scipy.linalg.eig(a, b, right=False, left=False)
     eigs = numpy.array(sorted(eigs, key=lambda x: abs(x)))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_jdqz_largest_magnitude(dtype):
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 100
+    atol = tol * 10
+    n = 20
+    k = 5
+    a = generate_random_dtype_array([n, n], dtype)
+    b = generate_random_dtype_array([n, n], dtype)
+
+    alpha, beta = jdqz.jdqz(a, b, k, Target.LargestMagnitude, tol=tol)
+    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: -abs(x)))
+
+    eigs = scipy.linalg.eig(a, b, right=False, left=False)
+    eigs = numpy.array(sorted(eigs, key=lambda x: -abs(x)))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_jdqz_smallest_real(dtype):
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 100
+    atol = tol * 10
+    n = 20
+    k = 5
+    a = generate_random_dtype_array([n, n], dtype)
+    b = generate_random_dtype_array([n, n], dtype)
+
+    alpha, beta = jdqz.jdqz(a, b, k, Target.SmallestRealPart, tol=tol)
+    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: x.real))
+
+    eigs = scipy.linalg.eig(a, b, right=False, left=False)
+    eigs = numpy.array(sorted(eigs, key=lambda x: x.real))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_jdqz_largest_real(dtype):
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 100
+    atol = tol * 10
+    n = 20
+    k = 5
+    a = generate_random_dtype_array([n, n], dtype)
+    b = generate_random_dtype_array([n, n], dtype)
+
+    alpha, beta = jdqz.jdqz(a, b, k, Target.LargestRealPart, tol=tol)
+    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: -x.real))
+
+    eigs = scipy.linalg.eig(a, b, right=False, left=False)
+    eigs = numpy.array(sorted(eigs, key=lambda x: -x.real))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_jdqz_smallest_imag(dtype):
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 100
+    atol = tol * 10
+    n = 20
+    k = 5
+    a = generate_random_dtype_array([n, n], dtype)
+    b = generate_random_dtype_array([n, n], dtype)
+
+    alpha, beta = jdqz.jdqz(a, b, k, Target.SmallestImaginaryPart, tol=tol)
+    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: x.imag))
+
+    eigs = scipy.linalg.eig(a, b, right=False, left=False)
+    eigs = numpy.array(sorted(eigs, key=lambda x: x.imag))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_jdqz_largest_imag(dtype):
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 100
+    atol = tol * 10
+    n = 20
+    k = 5
+    a = generate_random_dtype_array([n, n], dtype)
+    b = generate_random_dtype_array([n, n], dtype)
+
+    alpha, beta = jdqz.jdqz(a, b, k, Target.LargestImaginaryPart, tol=tol)
+    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: -x.imag))
+
+    eigs = scipy.linalg.eig(a, b, right=False, left=False)
+    eigs = numpy.array(sorted(eigs, key=lambda x: -x.imag))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_jdqz_target(dtype):
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 150
+    atol = tol * 10
+    n = 20
+    k = 5
+    a = generate_random_dtype_array([n, n], dtype)
+    b = generate_random_dtype_array([n, n], dtype)
+
+    target = Target.Target(complex(2, 2))
+    eigs = scipy.linalg.eig(a, b, right=False, left=False)
+    eigs = numpy.array(sorted(eigs, key=lambda x: abs(x - target.target)))
+    print(eigs)
+
+    target = Target.Target(complex(2, 2))
+    alpha, beta = jdqz.jdqz(a, b, k, target, tol=tol)
+    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: abs(x - target.target)))
+
+    eigs = scipy.linalg.eig(a, b, right=False, left=False)
+    eigs = numpy.array(sorted(eigs, key=lambda x: abs(x - target.target)))
     eigs = eigs[:k]
 
     assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
