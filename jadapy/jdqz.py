@@ -98,10 +98,10 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8,
             WBV[m, i] = dot(W[:, m], BV[:, i])
         WBV[m, m] = dot(W[:, m], BV[:, m])
 
-        found = True
+        [S, T, UL, UR] = generalized_schur(WAV[0:m+1, 0:m+1], WBV[0:m+1, 0:m+1])
 
+        found = True
         while found:
-            [S, T, UL, UR] = generalized_schur(WAV[0:m+1, 0:m+1], WBV[0:m+1, 0:m+1])
             [S, T, UL, UR] = generalized_schur_sort(S, T, UL, UR, target)
 
             alpha = S[0, 0]
@@ -149,6 +149,12 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8,
 
                 WAV[0:m, 0:m] = S[1:m+1, 1:m+1]
                 WBV[0:m, 0:m] = T[1:m+1, 1:m+1]
+
+                S = WAV[0:m, 0:m]
+                T = WBV[0:m, 0:m]
+
+                UL = numpy.identity(m, ctype)
+                UR = numpy.identity(m, ctype)
 
                 m -= 1
             else:
