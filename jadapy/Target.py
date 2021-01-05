@@ -22,8 +22,14 @@ class Target:
     def __init__(self, target):
         self.target = target
 
+    def __abs__(self):
+        return abs(self.target)
+
     def __complex__(self):
         return self.target
+
+    def __neg__(self):
+        return -self.target
 
     def __call__(self, target):
         self.target = target
