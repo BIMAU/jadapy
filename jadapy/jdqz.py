@@ -30,6 +30,10 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8,
     solver_tolerance = 1.0
 
     n = A.shape[0]
+
+    subspace_dimensions[0] = min(subspace_dimensions[0], n // 2)
+    subspace_dimensions[1] = min(subspace_dimensions[1], n)
+
     it = 1
     k = 0 # Number of eigenvalues found
     m = 0 # Size of the search subspace
@@ -162,18 +166,20 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8,
 
         m += 1
 
-        if m == subspace_dimensions[1]:
-            print("Shrinking the search space from %d to %d" % (m, subspace_dimensions[0]))
+        if m >= min(subspace_dimensions[1], n - k):
+            new_m = min(subspace_dimensions[0], n - k - 1)
 
-            V[:, 0:subspace_dimensions[0]] = V[:, 0:m] @ UR[:, 0:subspace_dimensions[0]]
-            AV[:, 0:subspace_dimensions[0]] = AV[:, 0:m] @ UR[:, 0:subspace_dimensions[0]]
-            BV[:, 0:subspace_dimensions[0]] = BV[:, 0:m] @ UR[:, 0:subspace_dimensions[0]]
-            W[:, 0:subspace_dimensions[0]] = W[:, 0:m] @ UL[:, 0:subspace_dimensions[0]]
+            print("Shrinking the search space from %d to %d" % (m, new_m))
 
-            WAV[0:subspace_dimensions[0], 0:subspace_dimensions[0]] = S[0:subspace_dimensions[0], 0:subspace_dimensions[0]]
-            WBV[0:subspace_dimensions[0], 0:subspace_dimensions[0]] = T[0:subspace_dimensions[0], 0:subspace_dimensions[0]]
+            V[:, 0:new_m] = V[:, 0:m] @ UR[:, 0:new_m]
+            AV[:, 0:new_m] = AV[:, 0:m] @ UR[:, 0:new_m]
+            BV[:, 0:new_m] = BV[:, 0:m] @ UR[:, 0:new_m]
+            W[:, 0:new_m] = W[:, 0:m] @ UL[:, 0:new_m]
 
-            m = subspace_dimensions[0]
+            WAV[0:new_m, 0:new_m] = S[0:new_m, 0:new_m]
+            WBV[0:new_m, 0:new_m] = T[0:new_m, 0:new_m]
+
+            m = new_m
 
         it += 1
 
