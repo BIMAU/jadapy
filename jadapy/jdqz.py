@@ -16,7 +16,7 @@ def generate_random_dtype_array(shape, dtype):
                 + numpy.random.rand(*shape) * 1.0j).astype(dtype)
     return numpy.random.rand(*shape).astype(dtype)
 
-def prec(x):
+def _prec(x):
     return x
 
 def dot(x, y):
@@ -25,8 +25,12 @@ def dot(x, y):
 def norm(x):
     return sqrt(dot(x, x).real)
 
-def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8,
+def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
          maxit=1000, subspace_dimensions=[20, 40], testspace='Harmonic Petrov'):
+
+    if not prec:
+        prec = _prec
+
     solver_tolerance = 1.0
 
     n = A.shape[0]
