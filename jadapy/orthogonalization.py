@@ -1,12 +1,12 @@
 from math import sqrt
 
-from numpy.linalg import norm
+from jadapy.utils import dot, norm
 
 def _proj(x, y):
     try:
-        y -= x * x.conj().dot(y)
+        y -= x @ dot(x, y)
     except ValueError:
-        y -= x @ (x.T.conj() @ y)
+        y -= x * x.conj().dot(y)
 
 def DGKS(V, w):
     if V.ndim > 1 and V.shape[1] < 1:

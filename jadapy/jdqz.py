@@ -5,25 +5,10 @@ from jadapy import Target
 from jadapy.generalized_schur import generalized_schur, generalized_schur_sort
 from jadapy.orthogonalization import orthogonalize, orthonormalize
 from jadapy.correction_equation import solve_generalized_correction_equation
-
-REAL_DTYPES = [numpy.float32, numpy.float64]
-COMPLEX_DTYPES = [numpy.complex64, numpy.complex128]
-DTYPES = REAL_DTYPES + COMPLEX_DTYPES
-
-def generate_random_dtype_array(shape, dtype):
-    if dtype in COMPLEX_DTYPES:
-        return (numpy.random.rand(*shape)
-                + numpy.random.rand(*shape) * 1.0j).astype(dtype)
-    return numpy.random.rand(*shape).astype(dtype)
+from jadapy.utils import dot, norm, generate_random_dtype_array
 
 def _prec(x):
     return x
-
-def dot(x, y):
-    return x.T.conj() @ y
-
-def norm(x):
-    return sqrt(dot(x, x).real)
 
 def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
          maxit=1000, subspace_dimensions=[20, 40], testspace='Harmonic Petrov'):
