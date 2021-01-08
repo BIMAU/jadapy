@@ -49,8 +49,12 @@ def orthogonalize(V, w=None, W=None, method='DGKS'):
         V = None
 
     if len(w.shape) > 1:
+        nrms = [0] * w.shape[1]
         for i in range(w.shape[1]):
-            orthogonalize(V, w[:, i], w[:, 0:i])
+            nrms[i] = orthogonalize(V, w[:, i], w[:, 0:i])
+            w[:, i] /= nrms[i]
+        for i in range(w.shape[1]):
+            w[:, i] *= nrms[i]
         return
 
     if method == 'Modified Gram-Schmidt':
