@@ -48,11 +48,30 @@ def test_orthonormalization_multiple_vectors(dtype):
     k = 5
     x = generate_random_dtype_array([n, k], dtype)
     orthogonalization.orthonormalize(x)
-
-    y = generate_random_dtype_array([n], dtype)
-    orthogonalization.orthogonalize(x, y)
     for i in range(k):
-        assert_allclose(dot(x[:, i], y), 0, rtol=0, atol=atol)
+        for j in range(k):
+            if i == j:
+                continue
+            assert_allclose(dot(x[:, i], x[:, j]), 0, rtol=0, atol=atol)
+        assert_allclose(norm(x[:, i]), 1, rtol=0, atol=atol)
+
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_orthonormalization_multiple_vectors_twice(dtype):
+    atol = numpy.finfo(dtype).eps * 100
+    n = 20
+    k = 5
+    x = generate_random_dtype_array([n, k], dtype)
+    orthogonalization.orthonormalize(x)
+
+    y = generate_random_dtype_array([n, k], dtype)
+    orthogonalization.orthonormalize(x, y)
+    for i in range(k):
+        for j in range(k):
+            assert_allclose(dot(x[:, i], y[:, j]), 0, rtol=0, atol=atol)
+            if i == j:
+                continue
+            assert_allclose(dot(y[:, i], y[:, j]), 0, rtol=0, atol=atol)
+        assert_allclose(norm(y[:, i]), 1, rtol=0, atol=atol)
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_orthogonalization(dtype):
@@ -64,7 +83,6 @@ def test_orthogonalization(dtype):
     y = generate_random_dtype_array([n], dtype)
     orthogonalization.orthogonalize(x, y)
     assert_allclose(dot(x, y), 0, rtol=0, atol=atol)
-    assert norm(y) > 1
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_orthogonalization_multiple_vectors(dtype):
@@ -73,8 +91,11 @@ def test_orthogonalization_multiple_vectors(dtype):
     k = 5
     x = generate_random_dtype_array([n, k], dtype)
     orthogonalization.orthonormalize(x)
-    assert_allclose(dot(x[:, 1], x[:, 3]), 0, rtol=0, atol=atol)
-    assert norm(x) > 1
+
+    y = generate_random_dtype_array([n], dtype)
+    orthogonalization.orthogonalize(x, y)
+    for i in range(k):
+        assert_allclose(dot(x[:, i], y), 0, rtol=0, atol=atol)
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_orthogonalization_no_vectors(dtype):
