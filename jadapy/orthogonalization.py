@@ -29,12 +29,18 @@ def DGKS(V, w, W=None):
 
 def modified_gs(V, w, W=None):
     if V is not None:
-        for i in range(V.shape[1]):
-            _proj(V[:, i], w)
+        if len(V.shape) > 1:
+            for i in range(V.shape[1]):
+                _proj(V[:, i], w)
+        else:
+            _proj(V, w)
 
     if W is not None:
-        for i in range(W.shape[1]):
-            _proj(W[:, i], w)
+        if len(W.shape) > 1:
+            for i in range(W.shape[1]):
+                _proj(W[:, i], w)
+        else:
+            _proj(W, w)
 
     return None
 
@@ -42,6 +48,7 @@ def normalize(w, nrm=None):
     if nrm is None:
         nrm = norm(w)
     w /= nrm
+    return nrm
 
 def orthogonalize(V, w=None, W=None, method='DGKS'):
     if w is None:
@@ -51,13 +58,13 @@ def orthogonalize(V, w=None, W=None, method='DGKS'):
     if len(w.shape) > 1:
         nrms = [0] * w.shape[1]
         for i in range(w.shape[1]):
-            nrms[i] = orthogonalize(V, w[:, i], w[:, 0:i])
-            w[:, i] /= nrms[i]
+            nrm = orthogonalize(V, w[:, i], w[:, 0:i])
+            nrms[i] = normalize(w[:, i], nrm)
         for i in range(w.shape[1]):
             w[:, i] *= nrms[i]
         return
 
-    if method == 'Modified Gram-Schmidt':
+    if method == 'Modified Gram-Schmidt' or method == 'MGS':
         return modified_gs(V, w, W)
     return DGKS(V, w, W)
 
