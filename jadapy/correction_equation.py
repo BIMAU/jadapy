@@ -14,7 +14,12 @@ class generalized_linear_operator(object):
         self.alpha = alpha
         self.beta = beta
 
-        self.dtype = self.A.dtype
+        if Q.dtype.char != Q.dtype.char.upper():
+            # Real case
+            self.alpha = self.alpha.real
+            self.beta = self.beta.real
+
+        self.dtype = self.Q.dtype
         self.shape = self.A.shape
 
         # self.lu, self.piv = scipy.linalg.lu_factor(H)
@@ -33,10 +38,14 @@ class generalized_linear_operator(object):
         return x - y
 
 def solve_generalized_correction_equation(A, B, prec, Q, Y, H, alpha, beta, r, tolerance):
+    v = r.copy()
+
     op = generalized_linear_operator(A, B, prec, Q, Y, H, alpha, beta)
     r = prec(r)
     r = op.proj(r)
-    v, info = linalg.gmres(op, -r, tol=tolerance, atol=0)
-    if info != 0:
-        raise Exception('GMRES returned ' + str(info))
+
+    for i in range(r.shape[1]):
+        v[:, i], info = linalg.gmres(op, -r[:, i], tol=tolerance, atol=0)
+        if info != 0:
+            raise Exception('GMRES returned ' + str(info))
     return v

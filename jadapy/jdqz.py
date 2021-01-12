@@ -1,4 +1,6 @@
 import numpy
+import scipy
+
 from math import sqrt
 
 from jadapy import Target
@@ -11,7 +13,10 @@ def _prec(x):
     return x
 
 def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
-         maxit=1000, subspace_dimensions=[20, 40], testspace='Harmonic Petrov'):
+         maxit=1000, subspace_dimensions=[20, 40], arithmetic='real', testspace='Harmonic Petrov'):
+
+    if arithmetic not in ['real', 'complex', 'r', 'c']:
+        raise ValueError("argument must be 'real', or 'complex'")
 
     if not prec:
         prec = _prec
@@ -26,136 +31,160 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
     it = 1
     k = 0 # Number of eigenvalues found
     m = 0 # Size of the search subspace
+    nev = 1 # Amount of eigenvalues currently converging
 
     dtype = A.dtype
     ctype = numpy.dtype(dtype.char.upper())
 
+    if arithmetic in ['complex', 'c']:
+        dtype = ctype
+
+    extra = 0
+    if dtype != ctype:
+        # Allocate extra space in case a complex eigenpair may exist for a real matrix
+        extra = 1
+
     if testspace == 'Harmonic Petrov':
         gamma = sqrt(1 + abs(target) ** 2)
-        nu = 1 / gamma
         mu = -target / gamma
+        nu = 1 / gamma
     else:
         gamma = sqrt(1 + abs(target) ** 2)
-        nu = conj(target) / gamma
         mu = 1 / gamma
+        nu = conj(target) / gamma
 
-    aconv = numpy.zeros(num, ctype)
-    bconv = numpy.zeros(num, ctype)
+    if dtype != ctype:
+        mu = numpy.array([[mu.real, mu.imag], [mu.imag, mu.real]])
+        nu = numpy.array([[nu.real, nu.imag], [nu.imag, nu.real]])
+    else:
+        mu = numpy.array([[mu]])
+        nu = numpy.array([[nu]])
+
+    aconv = numpy.zeros(num + extra, ctype)
+    bconv = numpy.zeros(num + extra, dtype)
 
     # Generalized Schur vectors
-    Q = numpy.zeros((n, num), ctype)
-    Z = numpy.zeros((n, num), ctype)
-    QZ = numpy.zeros((num, num), ctype)
+    Q = numpy.zeros((n, num + extra), dtype)
+    Z = numpy.zeros((n, num + extra), dtype)
+    QZ = numpy.zeros((num + extra, num + extra), dtype)
     # Orthonormal search subspace
-    V = numpy.zeros((n, subspace_dimensions[1]), ctype)
+    V = numpy.zeros((n, subspace_dimensions[1]), dtype)
     # Orthonormal test subspace
-    W = numpy.zeros((n, subspace_dimensions[1]), ctype)
+    W = numpy.zeros((n, subspace_dimensions[1]), dtype)
     # Preconditioned orthonormal search subspace
-    Y = numpy.zeros((n, subspace_dimensions[1]), ctype)
+    Y = numpy.zeros((n, subspace_dimensions[1]), dtype)
     # AV = A*V without orthogonalization
-    AV = numpy.zeros((n, subspace_dimensions[1]), ctype)
+    AV = numpy.zeros((n, subspace_dimensions[1]), dtype)
     # BV = B*V without orthogonalization
-    BV = numpy.zeros((n, subspace_dimensions[1]), ctype)
+    BV = numpy.zeros((n, subspace_dimensions[1]), dtype)
 
     # Low-dimensional projections: WAV = W'*A*V, WBV = W'*B*V
-    WAV = numpy.zeros((subspace_dimensions[1], subspace_dimensions[1]), ctype)
-    WBV = numpy.zeros((subspace_dimensions[1], subspace_dimensions[1]), ctype)
+    WAV = numpy.zeros((subspace_dimensions[1], subspace_dimensions[1]), dtype)
+    WBV = numpy.zeros((subspace_dimensions[1], subspace_dimensions[1]), dtype)
 
     while k < num and it <= maxit:
         solver_tolerance /= 2
 
         if it == 1:
-            V[:, 0] = generate_random_dtype_array([n], ctype)
+            V[:, 0] = generate_random_dtype_array([n], dtype)
         else:
-            V[:, m] = solve_generalized_correction_equation(A, B, prec, Q[:, 0:k+1], Y[:, 0:k+1], QZ[0:k+1, 0:k+1],
-                                                            alpha, beta, r, solver_tolerance)
+            V[:, m:m+nev] = solve_generalized_correction_equation(A, B, prec, Q[:, 0:k+nev], Y[:, 0:k+nev], QZ[0:k+nev, 0:k+nev],
+                                                                  evs[0, 0], evs[1, 0], r, solver_tolerance)
 
-        orthonormalize(V[:, 0:m], V[:, m])
+        orthonormalize(V[:, 0:m], V[:, m:m+nev])
 
-        AV[:, m] = A @ V[:, m]
-        BV[:, m] = B @ V[:, m]
-        W[:, m] = nu * AV[:, m] + mu * BV[:, m]
+        AV[:, m:m+nev] = A @ V[:, m:m+nev]
+        BV[:, m:m+nev] = B @ V[:, m:m+nev]
+        W[:, m:m+nev] = AV[:, m:m+nev] @ nu[0:nev, 0:nev] + BV[:, m:m+nev] @ mu[0:nev, 0:nev]
 
-        orthogonalize(Z[:, 0:k], W[:, m])
-        orthonormalize(W[:, 0:m], W[:, m])
+        orthogonalize(Z[:, 0:k], W[:, m:m+nev])
+        orthonormalize(W[:, 0:m], W[:, m:m+nev])
 
         # Update WAV = W' * A * V
         for i in range(m):
-            WAV[i, m] = dot(W[:, i], AV[:, m])
-            WAV[m, i] = dot(W[:, m], AV[:, i])
-        WAV[m, m] = dot(W[:, m], AV[:, m])
+            WAV[i, m:m+nev] = dot(W[:, i], AV[:, m:m+nev])
+            WAV[m:m+nev, i] = dot(W[:, m:m+nev], AV[:, i])
+        WAV[m:m+nev, m:m+nev] = dot(W[:, m:m+nev], AV[:, m:m+nev])
 
         # Update WBV = W' * B * V
         for i in range(m):
-            WBV[i, m] = dot(W[:, i], BV[:, m])
-            WBV[m, i] = dot(W[:, m], BV[:, i])
-        WBV[m, m] = dot(W[:, m], BV[:, m])
+            WBV[i, m:m+nev] = dot(W[:, i], BV[:, m:m+nev])
+            WBV[m:m+nev, i] = dot(W[:, m:m+nev], BV[:, i])
+        WBV[m:m+nev, m:m+nev] = dot(W[:, m:m+nev], BV[:, m:m+nev])
 
-        [S, T, UL, UR] = generalized_schur(WAV[0:m+1, 0:m+1], WBV[0:m+1, 0:m+1])
+        m += nev
+
+        [S, T, UL, UR] = generalized_schur(WAV[0:m, 0:m], WBV[0:m, 0:m])
 
         found = True
         while found:
             [S, T, UL, UR] = generalized_schur_sort(S, T, UL, UR, target)
 
-            alpha = S[0, 0]
-            beta = T[0, 0]
+            nev = 1
+            if dtype != ctype and S.shape[0] > 1 and abs(S[1, 0]) > 0.0:
+                # Complex eigenvalue in real arithmetic
+                nev = 2
 
-            Q[:, k] = V[:, 0:m+1] @ UR[:, 0]
-            orthonormalize(Q[:, 0:k], Q[:, k])
+            alpha = S[0:nev, 0:nev]
+            beta = T[0:nev, 0:nev]
 
-            Z[:, k] = W[:, 0:m+1] @ UL[:, 0]
-            orthonormalize(Z[:, 0:k], Z[:, k])
+            Q[:, k:k+nev] = V[:, 0:m] @ UR[:, 0:nev]
+            orthonormalize(Q[:, 0:k], Q[:, k:k+nev])
 
-            Y[:, k] = prec(Z[:, k])
+            Z[:, k:k+nev] = W[:, 0:m] @ UL[:, 0:nev]
+            orthonormalize(Z[:, 0:k], Z[:, k:k+nev])
 
-            r = beta * A @ Q[:, k] - alpha * B @ Q[:, k]
-            orthogonalize(Z[:, 0:k+1], r)
+            Y[:, k:k+nev] = prec(Z[:, k:k+nev])
+
+            r = A @ Q[:, k:k+nev] @ beta - B @ Q[:, k:k+nev] @ alpha
+            orthogonalize(Z[:, 0:k+nev], r)
 
             for i in range(k):
-                QZ[i, k] = dot(Q[:, i], Y[:, k])
-                QZ[k, i] = dot(Q[:, k], Y[:, i])
-            QZ[k, k] = dot(Q[:, k], Y[:, k])
+                QZ[i, k:k+nev] = dot(Q[:, i], Y[:, k:k+nev])
+                QZ[k:k+nev, i] = dot(Q[:, k:k+nev], Y[:, i])
+            QZ[k:k+nev, k:k+nev] = dot(Q[:, k:k+nev], Y[:, k:k+nev])
 
             rnorm = norm(r)
-            ev_est = alpha / beta
+
+            evs = scipy.linalg.eigvals(alpha, beta, homogeneous_eigvals=True)
+            ev_est = evs[0, 0] / evs[1, 0]
             print("Step: %4d, eigenvalue estimate: %13.6e + %13.6ei, residual norm: %e" % (it, ev_est.real, ev_est.imag, rnorm))
 
             # Store converged Petrov num
             if rnorm <= tol:
-                print("Found an eigenvalue:", ev_est)
+                for i in range(nev):
+                    print("Found an eigenvalue:", evs[0, i] / evs[1, i])
 
-                aconv[k] = alpha
-                bconv[k] = beta
-                k += 1
+                    aconv[k] = evs[0, i]
+                    bconv[k] = evs[1, i].real
+                    k += 1
 
-                if k == num:
+                if k >= num:
                     break
  
                 # Reset the iterative solver tolerance
                 solver_tolerance = 1.0
 
                 # Remove the eigenvalue from the search space
-                V[:, 0:m] = V[:, 0:m+1] @ UR[:, 1:m+1]
-                AV[:, 0:m] = AV[:, 0:m+1] @ UR[:, 1:m+1]
-                BV[:, 0:m] = BV[:, 0:m+1] @ UR[:, 1:m+1]
-                W[:, 0:m] = W[:, 0:m+1] @ UL[:, 1:m+1]
+                V[:, 0:m-nev] = V[:, 0:m] @ UR[:, nev:m]
+                AV[:, 0:m-nev] = AV[:, 0:m] @ UR[:, nev:m]
+                BV[:, 0:m-nev] = BV[:, 0:m] @ UR[:, nev:m]
+                W[:, 0:m-nev] = W[:, 0:m] @ UL[:, nev:m]
 
-                WAV[0:m, 0:m] = S[1:m+1, 1:m+1]
-                WBV[0:m, 0:m] = T[1:m+1, 1:m+1]
+                WAV[0:m-nev, 0:m-nev] = S[nev:m, nev:m]
+                WBV[0:m-nev, 0:m-nev] = T[nev:m, nev:m]
 
-                S = WAV[0:m, 0:m]
-                T = WBV[0:m, 0:m]
+                S = WAV[0:m-nev, 0:m-nev]
+                T = WBV[0:m-nev, 0:m-nev]
 
-                UL = numpy.identity(m, ctype)
-                UR = numpy.identity(m, ctype)
+                UL = numpy.identity(m-nev, dtype)
+                UR = numpy.identity(m-nev, dtype)
 
-                m -= 1
+                m -= nev
             else:
                 found = False
 
-        m += 1
-
-        if m >= min(subspace_dimensions[1], n - k):
+        if m + nev - 1 >= min(subspace_dimensions[1], n - k):
             new_m = min(subspace_dimensions[0], n - k - 1)
 
             print("Shrinking the search space from %d to %d" % (m, new_m))
@@ -172,4 +201,4 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
 
         it += 1
 
-    return aconv, bconv
+    return aconv[0:num], bconv[0:num]
