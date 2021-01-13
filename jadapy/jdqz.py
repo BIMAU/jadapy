@@ -48,10 +48,12 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
         gamma = sqrt(1 + abs(target) ** 2)
         mu = -target / gamma
         nu = 1 / gamma
-    else:
+    elif testspace == 'Petrov':
         gamma = sqrt(1 + abs(target) ** 2)
         mu = 1 / gamma
         nu = conj(target) / gamma
+    else:
+        raise Exception('Invalid testspace value')
 
     if dtype != ctype:
         mu = numpy.array([[mu.real, mu.imag], [mu.imag, mu.real]])
