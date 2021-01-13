@@ -12,6 +12,31 @@ from jadapy.utils import dot, norm, generate_random_dtype_array
 def _prec(x):
     return x
 
+def _set_testspace(testspace, target, alpha, beta, dtype, ctype):
+    gamma = sqrt(1 + abs(target) ** 2)
+
+    if testspace == 'Harmonic Petrov':
+        mu = -target / gamma
+        nu = 1 / gamma
+    elif testspace == 'Petrov':
+        mu = 1 / gamma
+        nu = conj(target) / gamma
+    elif testspace == 'Variable Petrov':
+        mu = -beta.conj()
+        nu = alpha.conj()
+    else:
+        raise Exception('Invalid testspace value')
+
+    if testspace != 'Variable Petrov':
+        if dtype != ctype:
+            mu = numpy.array([[mu.real, mu.imag], [mu.imag, mu.real]])
+            nu = numpy.array([[nu.real, nu.imag], [nu.imag, nu.real]])
+        else:
+            mu = numpy.array([[mu]])
+            nu = numpy.array([[nu]])
+
+    return mu, nu
+
 def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
          maxit=1000, subspace_dimensions=[20, 40], arithmetic='real', testspace='Harmonic Petrov'):
 
@@ -33,6 +58,9 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
     m = 0 # Size of the search subspace
     nev = 1 # Amount of eigenvalues currently converging
 
+    alpha = None
+    beta = None
+
     dtype = A.dtype
     ctype = numpy.dtype(dtype.char.upper())
 
@@ -43,24 +71,6 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
     if dtype != ctype:
         # Allocate extra space in case a complex eigenpair may exist for a real matrix
         extra = 1
-
-    if testspace == 'Harmonic Petrov':
-        gamma = sqrt(1 + abs(target) ** 2)
-        mu = -target / gamma
-        nu = 1 / gamma
-    elif testspace == 'Petrov':
-        gamma = sqrt(1 + abs(target) ** 2)
-        mu = 1 / gamma
-        nu = conj(target) / gamma
-    else:
-        raise Exception('Invalid testspace value')
-
-    if dtype != ctype:
-        mu = numpy.array([[mu.real, mu.imag], [mu.imag, mu.real]])
-        nu = numpy.array([[nu.real, nu.imag], [nu.imag, nu.real]])
-    else:
-        mu = numpy.array([[mu]])
-        nu = numpy.array([[nu]])
 
     aconv = numpy.zeros(num + extra, ctype)
     bconv = numpy.zeros(num + extra, dtype)
@@ -86,6 +96,8 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
 
     while k < num and it <= maxit:
         solver_tolerance /= 2
+
+        mu, nu = _set_testspace(testspace, target, alpha, beta, dtype, ctype)
 
         if it == 1:
             V[:, 0] = generate_random_dtype_array([n], dtype)
