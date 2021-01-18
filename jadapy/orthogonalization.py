@@ -1,6 +1,6 @@
 from math import sqrt
 
-from jadapy.utils import dot, norm
+from jadapy.utils import dot, norm, eps
 
 def _proj(x, y):
     if x is None:
@@ -44,9 +44,14 @@ def modified_gs(V, w, W=None):
 
     return None
 
-def normalize(w, nrm=None):
+def normalize(w, nrm=None, verbose=True):
     if nrm is None:
         nrm = norm(w)
+
+    if verbose and nrm < eps(w):
+        # print('Warning: norm during normalization is nearly zero: %e' % nrm)
+        raise Exception('Norm during normalization is nearly zero: %e' % nrm)
+
     w /= nrm
     return nrm
 
@@ -55,11 +60,11 @@ def orthogonalize(V, w=None, W=None, method='DGKS'):
         w = V
         V = None
 
-    if len(w.shape) > 1:
+    if len(w.shape) > 1 and w.shape[1] > 1:
         nrms = [0] * w.shape[1]
         for i in range(w.shape[1]):
             nrm = orthogonalize(V, w[:, i], w[:, 0:i])
-            nrms[i] = normalize(w[:, i], nrm)
+            nrms[i] = normalize(w[:, i], nrm, verbose=False)
         for i in range(w.shape[1]):
             w[:, i] *= nrms[i]
         return
@@ -73,7 +78,7 @@ def orthonormalize(V, w=None, W=None, method='DGKS'):
         w = V
         V = None
 
-    if len(w.shape) > 1:
+    if len(w.shape) > 1 and w.shape[1] > 1:
         for i in range(w.shape[1]):
             orthonormalize(V, w[:, i], w[:, 0:i])
         return

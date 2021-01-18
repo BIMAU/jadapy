@@ -17,3 +17,6 @@ def dot(x, y):
 
 def norm(x):
     return numpy.linalg.norm(x)
+
+def eps(x):
+    return numpy.finfo(x.dtype).eps * len(x)
