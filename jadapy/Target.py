@@ -11,6 +11,10 @@ class _TargetType:
     def __neg__():
         return 0.0
 
+    @staticmethod
+    def conj():
+        return 0.0
+
 SmallestMagnitude = _TargetType()
 LargestMagnitude = _TargetType()
 SmallestRealPart = _TargetType()
@@ -33,3 +37,6 @@ class Target:
 
     def __call__(self, target):
         self.target = target
+
+    def conj(self):
+        return self.target.conj()

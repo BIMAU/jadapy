@@ -265,3 +265,43 @@ def test_jdqz_prec(dtype):
 
     assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
     assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_jdqz_petrov(dtype):
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 150
+    atol = tol * 10
+    n = 20
+    k = 5
+    a = generate_test_matrix([n, n], dtype)
+    b = generate_test_matrix([n, n], dtype)
+
+    alpha, beta = jdqz.jdqz(a, b, num=k, tol=tol, testspace='Petrov')
+    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: abs(x)))
+
+    eigs = scipy.linalg.eigvals(a, b)
+    eigs = numpy.array(sorted(eigs, key=lambda x: abs(x)))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_jdqz_variable_petrov(dtype):
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 150
+    atol = tol * 10
+    n = 20
+    k = 5
+    a = generate_test_matrix([n, n], dtype)
+    b = generate_test_matrix([n, n], dtype)
+
+    alpha, beta = jdqz.jdqz(a, b, num=k, tol=tol, testspace='Variable Petrov')
+    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: abs(x)))
+
+    eigs = scipy.linalg.eigvals(a, b)
+    eigs = numpy.array(sorted(eigs, key=lambda x: abs(x)))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
