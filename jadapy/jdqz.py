@@ -198,8 +198,9 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
             else:
                 found = False
 
-        if m + nev - 1 >= min(subspace_dimensions[1], n - k):
-            new_m = min(subspace_dimensions[0], n - k - 1)
+        if m >= min(subspace_dimensions[1], n - k):
+            # Maximum search space dimension has been reached.
+            new_m = min(subspace_dimensions[0], n - k)
 
             print("Shrinking the search space from %d to %d" % (m, new_m))
 
@@ -212,6 +213,10 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
             WBV[0:new_m, 0:new_m] = T[0:new_m, 0:new_m]
 
             m = new_m
+        elif m + nev - 1 >= min(subspace_dimensions[1], n - k):
+            # Only one extra vector fits in the search space.
+            nev = 1
+            r = r[:, 0:1]
 
         it += 1
 
