@@ -16,26 +16,26 @@ def _set_testspace(testspace, target, alpha, beta, dtype, ctype):
     gamma = sqrt(1 + abs(target) ** 2)
 
     if testspace == 'Harmonic Petrov':
-        mu = -target / gamma
         nu = 1 / gamma
+        mu = -target / gamma
     elif testspace == 'Petrov' or (testspace == 'Variable Petrov' and alpha is None):
-        mu = 1 / gamma
         nu = target.conj() / gamma
+        mu = 1 / gamma
     elif testspace == 'Variable Petrov':
-        mu = beta.T.conj()
         nu = alpha.T.conj()
+        mu = beta.T.conj()
     else:
         raise Exception('Invalid testspace value')
 
     if not isinstance(mu, numpy.ndarray):
         if dtype != ctype:
-            mu = numpy.array([[mu.real, mu.imag], [mu.imag, mu.real]])
             nu = numpy.array([[nu.real, nu.imag], [nu.imag, nu.real]])
+            mu = numpy.array([[mu.real, mu.imag], [mu.imag, mu.real]])
         else:
-            mu = numpy.array([[mu]])
             nu = numpy.array([[nu]])
+            mu = numpy.array([[mu]])
 
-    return mu, nu
+    return nu, mu
 
 def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
          maxit=1000, subspace_dimensions=[20, 40], arithmetic='real', testspace='Harmonic Petrov'):
@@ -108,7 +108,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
         AV[:, m:m+nev] = A @ V[:, m:m+nev]
         BV[:, m:m+nev] = B @ V[:, m:m+nev]
 
-        mu, nu = _set_testspace(testspace, target, alpha, beta, dtype, ctype)
+        nu, mu = _set_testspace(testspace, target, alpha, beta, dtype, ctype)
         W[:, m:m+nev] = AV[:, m:m+nev] @ nu[0:nev, 0:nev] + BV[:, m:m+nev] @ mu[0:nev, 0:nev]
 
         orthogonalize(Z[:, 0:k], W[:, m:m+nev])
