@@ -150,13 +150,13 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
 
             Y[:, k:k+nev] = prec(Z[:, k:k+nev])
 
-            r = A @ Q[:, k:k+nev] @ beta - B @ Q[:, k:k+nev] @ alpha
-            orthogonalize(Z[:, 0:k+nev], r)
-
             for i in range(k):
                 QZ[i, k:k+nev] = dot(Q[:, i], Y[:, k:k+nev])
                 QZ[k:k+nev, i] = dot(Q[:, k:k+nev], Y[:, i])
             QZ[k:k+nev, k:k+nev] = dot(Q[:, k:k+nev], Y[:, k:k+nev])
+
+            r = A @ Q[:, k:k+nev] @ beta - B @ Q[:, k:k+nev] @ alpha
+            orthogonalize(Z[:, 0:k+nev], r)
 
             rnorm = norm(r)
 
