@@ -8,6 +8,7 @@ from jadapy.generalized_schur import generalized_schur, generalized_schur_sort
 from jadapy.orthogonalization import orthogonalize, orthonormalize
 from jadapy.correction_equation import solve_generalized_correction_equation
 from jadapy.utils import dot, norm, generate_random_dtype_array
+from jadapy.NumPyInterface import NumPyInterface
 
 def _prec(x):
     return x
@@ -38,7 +39,8 @@ def _set_testspace(testspace, target, alpha, beta, dtype, ctype):
     return nu, mu
 
 def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
-         maxit=1000, subspace_dimensions=[20, 40], arithmetic='real', testspace='Harmonic Petrov'):
+         maxit=1000, subspace_dimensions=[20, 40], arithmetic='real', testspace='Harmonic Petrov',
+         interface=None):
 
     if arithmetic not in ['real', 'complex', 'r', 'c']:
         raise ValueError("argument must be 'real', or 'complex'")
@@ -67,6 +69,9 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
     if arithmetic in ['complex', 'c']:
         dtype = ctype
 
+    if not interface:
+        interface = NumPyInterface(n, dtype)
+
     extra = 0
     if dtype != ctype:
         # Allocate extra space in case a complex eigenpair may exist for a real matrix
@@ -79,16 +84,17 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
     Q = numpy.zeros((n, num + extra), dtype)
     Z = numpy.zeros((n, num + extra), dtype)
     QZ = numpy.zeros((num + extra, num + extra), dtype)
+
     # Orthonormal search subspace
-    V = numpy.zeros((n, subspace_dimensions[1]), dtype)
+    V = interface.vector(subspace_dimensions[1])
     # Orthonormal test subspace
-    W = numpy.zeros((n, subspace_dimensions[1]), dtype)
+    W = interface.vector(subspace_dimensions[1])
     # Preconditioned orthonormal search subspace
-    Y = numpy.zeros((n, subspace_dimensions[1]), dtype)
+    Y = interface.vector(subspace_dimensions[1])
     # AV = A*V without orthogonalization
-    AV = numpy.zeros((n, subspace_dimensions[1]), dtype)
+    AV = interface.vector(subspace_dimensions[1])
     # BV = B*V without orthogonalization
-    BV = numpy.zeros((n, subspace_dimensions[1]), dtype)
+    BV = interface.vector(subspace_dimensions[1])
 
     # Low-dimensional projections: WAV = W'*A*V, WBV = W'*B*V
     WAV = numpy.zeros((subspace_dimensions[1], subspace_dimensions[1]), dtype)
