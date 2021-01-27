@@ -7,7 +7,7 @@ from jadapy import Target
 from jadapy.generalized_schur import generalized_schur, generalized_schur_sort
 from jadapy.orthogonalization import orthogonalize, orthonormalize
 from jadapy.correction_equation import solve_generalized_correction_equation
-from jadapy.utils import dot, norm, generate_random_dtype_array
+from jadapy.utils import dot, norm
 from jadapy.NumPyInterface import NumPyInterface
 
 def _prec(x):
@@ -104,7 +104,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
         solver_tolerance /= 2
 
         if it == 1:
-            V[:, 0] = generate_random_dtype_array([n], dtype)
+            V[:, 0] = interface.random()
         else:
             V[:, m:m+nev] = solve_generalized_correction_equation(A, B, prec, Q[:, 0:k+nev], Y[:, 0:k+nev], QZ[0:k+nev, 0:k+nev],
                                                                   evs[0, 0], evs[1, 0], r, solver_tolerance)
