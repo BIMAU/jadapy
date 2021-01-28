@@ -168,7 +168,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
 
             evs = scipy.linalg.eigvals(alpha, beta, homogeneous_eigvals=True)
             ev_est = evs[0, 0] / evs[1, 0]
-            print("Step: %4d, eigenvalue estimate: %13.6e + %13.6ei, residual norm: %e" % (it, ev_est.real, ev_est.imag, rnorm))
+            print("Step: %4d, subspace dimension: %3d, eigenvalue estimate: %13.6e + %13.6ei, residual norm: %e" % (it, m, ev_est.real, ev_est.imag, rnorm))
 
             # Store converged Petrov num
             if rnorm <= tol:
