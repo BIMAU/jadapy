@@ -7,8 +7,8 @@ DTYPES = REAL_DTYPES + COMPLEX_DTYPES
 def generate_random_dtype_array(shape, dtype):
     if dtype in COMPLEX_DTYPES:
         return (numpy.random.rand(*shape)
-                + numpy.random.rand(*shape) * 1.0j).astype(dtype)
-    return numpy.random.rand(*shape).astype(dtype)
+                + numpy.random.rand(*shape) * 1.0j).astype(dtype, copy=False)
+    return numpy.random.rand(*shape).astype(dtype, copy=False)
 
 class NumPyInterface:
 
