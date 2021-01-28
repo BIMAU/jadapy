@@ -37,15 +37,8 @@ class generalized_linear_operator(object):
         y = self.Y @ y
         return x - y
 
-def solve_generalized_correction_equation(A, B, prec, Q, Y, H, alpha, beta, r, tolerance):
-    v = r.copy()
-
+def solve_generalized_correction_equation(A, B, prec, Q, Y, H, alpha, beta, r, tolerance, interface):
     op = generalized_linear_operator(A, B, prec, Q, Y, H, alpha, beta)
     r = prec(r)
     r = op.proj(r)
-
-    for i in range(r.shape[1]):
-        v[:, i], info = linalg.gmres(op, -r[:, i], tol=tolerance, atol=0)
-        if info != 0:
-            raise Exception('GMRES returned ' + str(info))
-    return v
+    return interface.solve(op, -r, tolerance)

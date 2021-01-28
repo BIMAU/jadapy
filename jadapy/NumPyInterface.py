@@ -1,5 +1,7 @@
 import numpy
 
+from scipy.sparse import linalg
+
 REAL_DTYPES = [numpy.float32, numpy.float64]
 COMPLEX_DTYPES = [numpy.complex64, numpy.complex128]
 DTYPES = REAL_DTYPES + COMPLEX_DTYPES
@@ -24,3 +26,11 @@ class NumPyInterface:
 
     def random(self):
         return generate_random_dtype_array([self.n], self.dtype)
+
+    def solve(self, op, x, tol):
+        out = x.copy()
+        for i in range(x.shape[1]):
+            out[:, i] , info = linalg.gmres(op, x[:, i], tol=tol, atol=0)
+            if info != 0:
+                raise Exception('GMRES returned ' + str(info))
+        return out
