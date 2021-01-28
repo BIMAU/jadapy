@@ -306,3 +306,34 @@ def test_jdqz_variable_petrov(dtype):
 
     assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
     assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+def test_Epetra():
+    from PyTrilinos import Epetra
+    from jadapy import EpetraInterface
+
+    dtype = numpy.float64
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 150
+    atol = tol * 10
+    n = 20
+    k = 5
+
+    comm = Epetra.PyComm()
+    map = Epetra.Map(n, 0, comm)
+    a = EpetraInterface.CrsMatrix(Epetra.Copy, map, n)
+    b = EpetraInterface.CrsMatrix(Epetra.Copy, map, n)
+
+    a.random()
+    b.random()
+
+    interface = EpetraInterface.EpetraInterface(map)
+
+    alpha, beta = jdqz.jdqz(a, b, num=k, tol=tol, subspace_dimensions=[10, 16], interface=interface)
+    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: abs(x)))
+
+    eigs = scipy.linalg.eigvals(a, b)
+    eigs = numpy.array(sorted(eigs, key=lambda x: abs(x)))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)

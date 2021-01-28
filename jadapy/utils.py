@@ -3,7 +3,10 @@ from math import sqrt
 import numpy
 
 def dot(x, y):
-    return x.T.conj() @ y
+    try:
+        return x.T.conj() @ y
+    except AttributeError:
+        return x.dot(y)
 
 def norm(x):
     if len(x.shape) < 2 or x.shape[1] < 2:

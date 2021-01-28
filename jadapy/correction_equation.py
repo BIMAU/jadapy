@@ -1,7 +1,7 @@
 import numpy
 import scipy
 
-from scipy.sparse import linalg
+from jadapy.utils import dot
 
 class generalized_linear_operator(object):
     def __init__(self, A, B, prec, Q, Y, H, alpha, beta):
@@ -26,12 +26,12 @@ class generalized_linear_operator(object):
 
     def matvec(self, x):
         y = self.proj(x)
-        y = self.beta * (self.A @ y) - self.alpha * (self.B @ y)
+        y = (self.A @ y) * self.beta - (self.B @ y) * self.alpha
         y = self.prec(y)
         return self.proj(y)
 
     def proj(self, x):
-        y = self.Q.T.conj() @ x
+        y = dot(self.Q, x)
         y = numpy.linalg.solve(self.H, y)
         # y = scipy.linalg.lu_solve((self.lu, self.piv), y)
         y = self.Y @ y
