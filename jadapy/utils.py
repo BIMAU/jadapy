@@ -6,7 +6,13 @@ def dot(x, y):
     return x.T.conj() @ y
 
 def norm(x):
-    return numpy.linalg.norm(x)
+    if len(x.shape) < 2 or x.shape[1] < 2:
+        return sqrt(dot(x, x).real)
+
+    s = 0
+    for i in range(x.shape[1]):
+        s += dot(x[:, i], x[:, i]).real
+    return sqrt(s)
 
 def eps(x):
     return numpy.finfo(x.dtype).eps * 10
