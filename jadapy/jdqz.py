@@ -81,8 +81,8 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
     bconv = numpy.zeros(num + extra, dtype)
 
     # Generalized Schur vectors
-    Q = numpy.zeros((n, num + extra), dtype)
-    Z = numpy.zeros((n, num + extra), dtype)
+    Q = interface.vector(num + extra)
+    Z = interface.vector(num + extra)
     QZ = numpy.zeros((num + extra, num + extra), dtype)
 
     # Orthonormal search subspace
