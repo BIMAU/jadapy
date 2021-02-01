@@ -131,3 +131,25 @@ def test_orthogonalization_no_vectors(dtype, otype):
     y = generate_random_dtype_array([n], dtype)
     orthogonalization.orthogonalize(x, y, method=otype)
     assert norm(y) > 1
+
+@pytest.mark.parametrize('otype', OTYPES)
+def test_orthonormalization_epetra(otype):
+    from PyTrilinos import Epetra
+    from jadapy import EpetraInterface
+
+    dtype = numpy.float64
+    atol = numpy.finfo(dtype).eps * 100
+    n = 20
+    k = 5
+
+    comm = Epetra.PyComm()
+    map = Epetra.Map(n, 0, comm)
+    x = EpetraInterface.Vector(map, k)
+    x.Random()
+
+    orthogonalization.orthogonalize(x, method=otype)
+    for i in range(k):
+        for j in range(k):
+            if i == j:
+                continue
+            assert_allclose(x[:, i].dot(x[:, j]), 0, rtol=0, atol=atol)

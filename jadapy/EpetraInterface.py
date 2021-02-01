@@ -33,14 +33,14 @@ class Vector(Epetra.MultiVector):
         raise Exception('Only full vectors are supported')
 
     def dot(self, x):
-        if len(x.shape) < 2 or x.shape[1] < 2:
-            return self.Dot(x)
-
-        # Dot only works on the first vector of x
         local_map = Epetra.LocalMap(self.shape[1], 0, self.Comm())
-        out = Epetra.MultiVector(local_map, x.shape[1])
-        out.Multiply('T', 'N', 1.0, self, x, 0.0)
-        return out.array.copy().T
+        tmp = Epetra.MultiVector(local_map, x.shape[1])
+        tmp.Multiply('T', 'N', 1.0, self, x, 0.0)
+
+        if self.shape[1] == 1 or x.shape[1] == 1:
+            # Numpy expects a 1D array in this case
+            return tmp.array.copy().flatten()
+        return tmp.array.copy().T
 
     def conj(self):
         return self
@@ -50,8 +50,8 @@ class Vector(Epetra.MultiVector):
             assert len(x.shape) == 1 and x.shape[0] == 1
             x = x[0]
 
-        tmp = Vector(self.Map(), 1)
-        tmp.Update(x, self, 0.0)
+        tmp = Vector(self)
+        tmp.Scale(x)
         return tmp
 
     def __matmul__(self, x):
@@ -60,7 +60,6 @@ class Vector(Epetra.MultiVector):
             x = Epetra.MultiVector(local_map, x.T)
 
         tmp = Vector(self.Map(), x.NumVectors())
-
         tmp.Multiply('N', 'N', 1.0, self, x, 0.0)
         return tmp
 
