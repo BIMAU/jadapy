@@ -336,9 +336,7 @@ def generate_Epetra_test_matrix(map, shape, dtype):
 
     for i in range(shape[0]):
         for j in range(shape[1]):
-            lid = map.LID(i)
-            if lid > -1:
-                a2[lid, j] = a1[i, j]
+            a2[i, j] = a1[i, j]
     a2.FillComplete()
 
     return a1, a2
