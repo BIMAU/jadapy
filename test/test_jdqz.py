@@ -307,6 +307,22 @@ def test_jdqz_variable_petrov(dtype):
     assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
     assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
 
+def generate_Epetra_test_matrix(map, shape, dtype):
+    from PyTrilinos import Epetra
+    from jadapy import EpetraInterface
+
+    a1 = generate_test_matrix(shape, dtype)
+    a2 = EpetraInterface.CrsMatrix(Epetra.Copy, map, shape[1])
+
+    for i in range(shape[0]):
+        for j in range(shape[1]):
+            lid = map.LID(i)
+            if lid > -1:
+                a2[lid, j] = a1[i, j]
+    a2.FillComplete()
+
+    return a1, a2
+
 def test_Epetra():
     from PyTrilinos import Epetra
     from jadapy import EpetraInterface
@@ -320,18 +336,15 @@ def test_Epetra():
 
     comm = Epetra.PyComm()
     map = Epetra.Map(n, 0, comm)
-    a = EpetraInterface.CrsMatrix(Epetra.Copy, map, n)
-    b = EpetraInterface.CrsMatrix(Epetra.Copy, map, n)
-
-    a.random()
-    b.random()
+    a1, a2 = generate_Epetra_test_matrix(map, [n, n], dtype)
+    b1, b2 = generate_Epetra_test_matrix(map, [n, n], dtype)
 
     interface = EpetraInterface.EpetraInterface(map)
 
-    alpha, beta = jdqz.jdqz(a, b, num=k, tol=tol, subspace_dimensions=[10, 16], interface=interface)
+    alpha, beta = jdqz.jdqz(a2, b2, num=k, tol=tol, subspace_dimensions=[10, 20], interface=interface)
     jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: abs(x)))
 
-    eigs = scipy.linalg.eigvals(a, b)
+    eigs = scipy.linalg.eigvals(a1, b1)
     eigs = numpy.array(sorted(eigs, key=lambda x: abs(x)))
     eigs = eigs[:k]
 

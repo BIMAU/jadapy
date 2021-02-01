@@ -86,12 +86,6 @@ class CrsMatrix(Epetra.CrsMatrix):
         self.dtype = numpy.dtype('d')
         self.shape = [self.NumGlobalRows(), self.NumGlobalCols()]
 
-    def random(self):
-        for i in range(self.NumMyRows()):
-            for j in range(self.NumMyCols()):
-                self[i, j] = numpy.random.random_sample()
-        self.FillComplete()
-
     def __matmul__(self, x):
         tmp = Vector(self.RangeMap(), x.NumVectors())
         self.Apply(x, tmp)
