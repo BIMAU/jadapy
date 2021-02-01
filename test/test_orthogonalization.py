@@ -1,11 +1,11 @@
 import pytest
 
 import numpy
-from numpy.linalg import norm
 
 from numpy.testing import assert_equal, assert_allclose
 
 from jadapy import orthogonalization
+from jadapy.utils import norm
 
 REAL_DTYPES = [numpy.float32, numpy.float64]
 COMPLEX_DTYPES = [numpy.complex64, numpy.complex128]
@@ -133,7 +133,30 @@ def test_orthogonalization_no_vectors(dtype, otype):
     assert norm(y) > 1
 
 @pytest.mark.parametrize('otype', OTYPES)
-def test_orthonormalization_epetra(otype):
+def test_orthonormalization_multiple_vectors(otype):
+    from PyTrilinos import Epetra
+    from jadapy import EpetraInterface
+
+    dtype = numpy.float64
+    atol = numpy.finfo(dtype).eps * 100
+    n = 20
+    k = 5
+
+    comm = Epetra.PyComm()
+    map = Epetra.Map(n, 0, comm)
+    x = EpetraInterface.Vector(map, k)
+    x.Random()
+
+    orthogonalization.orthonormalize(x, method=otype)
+    for i in range(k):
+        for j in range(k):
+            if i == j:
+                continue
+            assert_allclose(x[:, i].dot(x[:, j]), 0, rtol=0, atol=atol)
+        assert_allclose(norm(x[:, i]), 1, rtol=0, atol=atol)
+
+@pytest.mark.parametrize('otype', OTYPES)
+def test_orthogonalization_epetra(otype):
     from PyTrilinos import Epetra
     from jadapy import EpetraInterface
 
