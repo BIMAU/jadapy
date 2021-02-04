@@ -39,7 +39,7 @@ def _set_testspace(testspace, target, alpha, beta, dtype, ctype):
     return nu, mu
 
 def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
-         maxit=1000, subspace_dimensions=[20, 40], arithmetic='real', testspace='Harmonic Petrov',
+         maxit=1000, subspace_dimensions=None, arithmetic='real', testspace='Harmonic Petrov',
          interface=None):
 
     if arithmetic not in ['real', 'complex', 'r', 'c']:
@@ -51,6 +51,9 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
     solver_tolerance = 1.0
 
     n = A.shape[0]
+
+    if not subspace_dimensions:
+        subspace_dimensions = [20, 40]
 
     subspace_dimensions[0] = min(subspace_dimensions[0], n // 2)
     subspace_dimensions[1] = min(subspace_dimensions[1], n)
