@@ -21,13 +21,13 @@ def generate_random_dtype_array(shape, dtype):
 
 def generate_test_matrix(shape, dtype):
     a = generate_random_dtype_array(shape, dtype)
-    a += 2 * numpy.diag(numpy.ones([shape[0]], dtype))
+    a += 3 * numpy.diag(numpy.ones([shape[0]], dtype))
     return a
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqz_smallest_magnitude(dtype):
     numpy.random.seed(1234)
-    tol = numpy.finfo(dtype).eps * 150
+    tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
     k = 5
@@ -47,7 +47,7 @@ def test_jdqz_smallest_magnitude(dtype):
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqz_largest_magnitude(dtype):
     numpy.random.seed(1234)
-    tol = numpy.finfo(dtype).eps * 150
+    tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
     k = 5
@@ -68,7 +68,7 @@ def test_jdqz_largest_magnitude(dtype):
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqz_smallest_real(dtype):
     numpy.random.seed(1234)
-    tol = numpy.finfo(dtype).eps * 150
+    tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
     k = 5
@@ -88,7 +88,7 @@ def test_jdqz_smallest_real(dtype):
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqz_largest_real(dtype):
     numpy.random.seed(1234)
-    tol = numpy.finfo(dtype).eps * 150
+    tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
     k = 5
@@ -108,7 +108,7 @@ def test_jdqz_largest_real(dtype):
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqz_smallest_imag(dtype):
     numpy.random.seed(1234)
-    tol = numpy.finfo(dtype).eps * 150
+    tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
     k = 5
@@ -128,7 +128,7 @@ def test_jdqz_smallest_imag(dtype):
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqz_smallest_imag_real(dtype):
     numpy.random.seed(1234)
-    tol = numpy.finfo(dtype).eps * 150
+    tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
     k = 6
@@ -153,7 +153,7 @@ def test_jdqz_smallest_imag_real(dtype):
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqz_largest_imag(dtype):
     numpy.random.seed(1234)
-    tol = numpy.finfo(dtype).eps * 150
+    tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
     k = 5
@@ -173,7 +173,7 @@ def test_jdqz_largest_imag(dtype):
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqz_largest_imag_real(dtype):
     numpy.random.seed(1234)
-    tol = numpy.finfo(dtype).eps * 150
+    tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
     k = 6
@@ -198,7 +198,7 @@ def test_jdqz_largest_imag_real(dtype):
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqz_target(dtype):
     numpy.random.seed(1234)
-    tol = numpy.finfo(dtype).eps * 150
+    tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
     k = 5
@@ -219,7 +219,7 @@ def test_jdqz_target(dtype):
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqz_target_real(dtype):
     numpy.random.seed(1234)
-    tol = numpy.finfo(dtype).eps * 150
+    tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
     k = 6
@@ -245,7 +245,7 @@ def test_jdqz_target_real(dtype):
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqz_prec(dtype):
     numpy.random.seed(1234)
-    tol = numpy.finfo(dtype).eps * 150
+    tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
     k = 5
@@ -269,7 +269,7 @@ def test_jdqz_prec(dtype):
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqz_petrov(dtype):
     numpy.random.seed(1234)
-    tol = numpy.finfo(dtype).eps * 150
+    tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
     k = 5
@@ -289,7 +289,7 @@ def test_jdqz_petrov(dtype):
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqz_variable_petrov(dtype):
     numpy.random.seed(1234)
-    tol = numpy.finfo(dtype).eps * 150
+    tol = numpy.finfo(dtype).eps * 1e3
     # Apparently this is really bad?
     atol = 1e-2
     n = 20
@@ -310,7 +310,7 @@ def test_jdqz_variable_petrov(dtype):
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqz_largest_magnitude_lowdim(dtype):
     numpy.random.seed(1234)
-    tol = numpy.finfo(dtype).eps * 150
+    tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
     k = 5
@@ -347,7 +347,7 @@ def test_Epetra():
 
     dtype = numpy.float64
     numpy.random.seed(1234)
-    tol = numpy.finfo(dtype).eps * 150
+    tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
     k = 5
@@ -375,7 +375,7 @@ def test_Epetra_lowdim():
 
     dtype = numpy.float64
     numpy.random.seed(1234)
-    tol = numpy.finfo(dtype).eps * 150
+    tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
     k = 5
@@ -387,7 +387,7 @@ def test_Epetra_lowdim():
 
     interface = EpetraInterface.EpetraInterface(map)
 
-    alpha, beta = jdqz.jdqz(a2, b2, k, Target.LargestMagnitude, tol=tol, subspace_dimensions=[10, 17], interface=interface)
+    alpha, beta = jdqz.jdqz(a2, b2, k, Target.LargestMagnitude, tol=tol, subspace_dimensions=[10, 18], interface=interface)
     jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: -abs(x)))
 
     eigs = scipy.linalg.eigvals(a1, b1)
