@@ -147,6 +147,8 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
             alpha = S[0:nev, 0:nev]
             beta = T[0:nev, 0:nev]
 
+            evcond = sqrt(norm(alpha) ** 2 + norm(beta) ** 2)
+
             Q[:, k:k+nev] = V[:, 0:m] @ UR[:, 0:nev]
             orthonormalize(Q[:, 0:k], Q[:, k:k+nev])
 
@@ -163,13 +165,13 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
             r = A @ Q[:, k:k+nev] @ beta - B @ Q[:, k:k+nev] @ alpha
             orthogonalize(Z[:, 0:k+nev], r)
 
-            rnorm = norm(r)
+            rnorm = norm(r) / evcond
 
             evs = scipy.linalg.eigvals(alpha, beta, homogeneous_eigvals=True)
             ev_est = evs[0, 0] / evs[1, 0]
             print("Step: %4d, subspace dimension: %3d, eigenvalue estimate: %13.6e + %13.6ei, residual norm: %e" % (it, m, ev_est.real, ev_est.imag, rnorm))
 
-            # Store converged Petrov num
+            # Store converged Petrov pairs
             if rnorm <= tol:
                 for i in range(nev):
                     print("Found an eigenvalue:", evs[0, i] / evs[1, i])
