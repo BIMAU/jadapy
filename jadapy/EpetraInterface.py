@@ -94,7 +94,7 @@ class CrsMatrix(Epetra.CrsMatrix):
 class Operator(Epetra.Operator):
 
     def __init__(self, op):
-        Epetra.Operator.__init__(self)
+        super().__init__()
 
         self.op = op
 
