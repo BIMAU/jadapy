@@ -48,7 +48,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
     if not prec:
         prec = _prec
 
-    solver_tolerance = 1.0
+    solver_tolerance = 0.5
 
     n = A.shape[0]
 
@@ -100,8 +100,6 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
     WBV = numpy.zeros((_subspace_dimensions[1], _subspace_dimensions[1]), dtype)
 
     while k < num and it <= maxit:
-        solver_tolerance /= 2
-
         if it == 1:
             V[:, 0] = interface.random()
         else:
@@ -205,6 +203,8 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
                 m -= nev
             else:
                 found = False
+
+        solver_tolerance = max(solver_tolerance / 2, tol)
 
         if m >= min(_subspace_dimensions[1], n - k):
             # Maximum search space dimension has been reached.
