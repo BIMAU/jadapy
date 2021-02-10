@@ -30,8 +30,8 @@ def _set_testspace(testspace, target, alpha, beta, dtype, ctype):
 
     if not isinstance(mu, numpy.ndarray):
         if dtype != ctype:
-            nu = numpy.array([[nu.real, nu.imag], [nu.imag, nu.real]])
-            mu = numpy.array([[mu.real, mu.imag], [mu.imag, mu.real]])
+            nu = numpy.array([[nu.real, nu.imag], [-nu.imag, nu.real]])
+            mu = numpy.array([[mu.real, mu.imag], [-mu.imag, mu.real]])
         else:
             nu = numpy.array([[nu]])
             mu = numpy.array([[mu]])
