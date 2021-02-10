@@ -122,27 +122,36 @@ def _select(start, end, a, b, target):
 def generalized_schur_sort(a, b, q, z, target):
     n = a.shape[0]
 
-    # tgexc, = scipy.linalg.get_lapack_funcs(('tgexc',), (a,b,))
-    # for i in range(n):
-    #     idx = _select(i, n, a, b, target)
+    try:
+        tgexc, = scipy.linalg.get_lapack_funcs(('tgexc',), (a,b,))
+        for i in range(n):
+            if i > 0 and a[i, i - 1] != 0:
+                # Complex conjugate eigenpair
+                continue
 
+            idx = _select(i, n, a, b, target)
 
-    #     result = tgexc(a, b, q, z, idx, 0)
-    #     assert result[-1] == 0
+            result = tgexc(a, b, q, z, idx, i)
+            assert result[-1] == 0
 
-    # return result[0], result[1], result[2], result[3]
+            a = result[0]
+            b = result[1]
+            q = result[2]
+            z = result[3]
 
-    tgsen, = scipy.linalg.get_lapack_funcs(('tgsen',), (a,b,))
-    idx = _select(0, n, a, b, target)
+        return a, b, q, z
+    except ValueError:
+        tgsen, = scipy.linalg.get_lapack_funcs(('tgsen',), (a,b,))
+        idx = _select(0, n, a, b, target)
 
-    select = numpy.zeros(n)
-    select[idx] = 1
+        select = numpy.zeros(n)
+        select[idx] = 1
 
-    result = tgsen(select, a, b, q, z, lwork=-1)
-    assert result[-1] == 0
-    lwork = result[-3][0].real.astype(numpy.int_) + 1
+        result = tgsen(select, a, b, q, z, lwork=-1)
+        assert result[-1] == 0
+        lwork = result[-3][0].real.astype(numpy.int_) + 1
 
-    result = tgsen(select, a, b, q, z, lwork=lwork)
-    assert result[-1] == 0
+        result = tgsen(select, a, b, q, z, lwork=lwork)
+        assert result[-1] == 0
 
-    return result[0], result[1], result[-9], result[-8]
+        return result[0], result[1], result[-9], result[-8]
