@@ -4,11 +4,12 @@ import scipy
 from jadapy.utils import dot
 
 class generalized_linear_operator(object):
-    def __init__(self, A, B, prec, Q, Y, H, alpha, beta):
+    def __init__(self, A, B, prec, Q, Z, Y, H, alpha, beta):
         self.A = A
         self.B = B
         self.prec = prec
         self.Q = Q
+        self.Z = Z
         self.Y = Y
         self.H = H
         self.alpha = alpha
@@ -37,8 +38,8 @@ class generalized_linear_operator(object):
         y = self.Y @ y
         return x - y
 
-def solve_generalized_correction_equation(A, B, prec, Q, Y, H, alpha, beta, r, tolerance, interface):
-    op = generalized_linear_operator(A, B, prec, Q, Y, H, alpha, beta)
+def solve_generalized_correction_equation(A, B, prec, Q, Z, Y, H, alpha, beta, r, tolerance, interface):
+    op = generalized_linear_operator(A, B, prec, Q, Z, Y, H, alpha, beta)
     r = prec(r)
     r = op.proj(r)
     return interface.solve(op, -r, tolerance)

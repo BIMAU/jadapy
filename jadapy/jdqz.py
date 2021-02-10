@@ -105,8 +105,9 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
         if it == 1:
             V[:, 0] = interface.random()
         else:
-            V[:, m:m+nev] = solve_generalized_correction_equation(A, B, prec, Q[:, 0:k+nev], Y[:, 0:k+nev], QZ[0:k+nev, 0:k+nev],
-                                                                  evs[0, 0], evs[1, 0], r, solver_tolerance, interface)
+            V[:, m:m+nev] = solve_generalized_correction_equation(
+                A, B, prec, Q[:, 0:k+nev], Z[:, 0:k+nev], Y[:, 0:k+nev], QZ[0:k+nev, 0:k+nev],
+                evs[0, 0], evs[1, 0], r, solver_tolerance, interface)
 
         orthonormalize(V[:, 0:m], V[:, m:m+nev])
 
