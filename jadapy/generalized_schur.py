@@ -131,6 +131,9 @@ def generalized_schur_sort(a, b, q, z, target):
 
             idx = _select(i, n, a, b, target)
 
+            if idx == i:
+                continue
+
             result = tgexc(a, b, q, z, idx, i)
             assert result[-1] == 0
 
