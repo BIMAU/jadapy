@@ -374,7 +374,7 @@ def test_Epetra_lowdim():
     from jadapy import EpetraInterface
 
     dtype = numpy.float64
-    numpy.random.seed(1234)
+    numpy.random.seed(12345)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
