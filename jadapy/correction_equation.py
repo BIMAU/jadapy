@@ -17,7 +17,10 @@ class generalized_linear_operator(object):
 
         if Q.dtype.char != Q.dtype.char.upper():
             # Real case
-            self.alpha = self.alpha.real
+            if abs(self.alpha.real) < abs(self.alpha.imag):
+                self.alpha = self.alpha.imag
+            else:
+                self.alpha = self.alpha.real
             self.beta = self.beta.real
 
         self.dtype = self.Q.dtype
