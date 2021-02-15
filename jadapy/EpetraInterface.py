@@ -99,10 +99,15 @@ class Operator(Epetra.Operator):
         self.op = op
 
     def Apply(self, x, y):
-        # Create a view here because this is an Epetra.MultiVector
+        # Create a view here because this is an Epetra.MultiVector.
         x = Vector(Epetra.View, x, 0, x.NumVectors())
         z = self.op.matvec(x)
         return y.Update(1.0, z, 0.0)
+
+    def ApplyInverse(self, x, y):
+        # Just copy the vector. This is used when no preconditioning
+        # is required in the solver itself.
+        return y.Update(1.0, x, 0.0)
 
     def Comm(self):
         return self.op.Q.Comm()
@@ -114,6 +119,9 @@ class Operator(Epetra.Operator):
         return self.op.A.OperatorRangeMap()
 
     def HasNormInf(self):
+        return False
+
+    def UseTranspose(self):
         return False
 
     def Label(self):
