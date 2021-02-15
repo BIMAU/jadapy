@@ -221,7 +221,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
 
         solver_tolerance = max(solver_tolerance / 2, tol)
 
-        if m >= min(_subspace_dimensions[1], n - k):
+        if m >= min(_subspace_dimensions[1], n - k) and k < num:
             # Maximum search space dimension has been reached.
             new_m = min(_subspace_dimensions[0], n - k)
 
