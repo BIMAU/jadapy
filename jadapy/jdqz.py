@@ -40,7 +40,7 @@ def _set_testspace(testspace, target, alpha, beta, dtype, ctype):
 
 def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
          maxit=1000, subspace_dimensions=(20, 40), arithmetic='real', testspace='Harmonic Petrov',
-         interface=None):
+         return_eigenvectors=False, interface=None):
 
     if arithmetic not in ['real', 'complex', 'r', 'c']:
         raise ValueError("argument must be 'real', or 'complex'")
@@ -76,8 +76,13 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
         # Allocate extra space in case a complex eigenpair may exist for a real matrix
         extra = 1
 
+    # Generalized eigenvalues
     aconv = numpy.zeros(num + extra, ctype)
     bconv = numpy.zeros(num + extra, dtype)
+
+    # Generalized Schur matrices
+    RA = numpy.zeros((num + extra, num + extra), dtype)
+    RB = numpy.zeros((num + extra, num + extra), dtype)
 
     # Generalized Schur vectors
     Q = interface.vector(num + extra)
@@ -172,6 +177,16 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
 
             # Store converged Petrov pairs
             if rnorm <= tol:
+                # Compute RA and RB so we can compute the eigenvectors
+                if return_eigenvectors:
+                    for i in range(k):
+                        RA[i, k:k+nev] = dot(Z[:, i], A @ Q[:, k:k+nev])
+                        RB[i, k:k+nev] = dot(Z[:, i], B @ Q[:, k:k+nev])
+
+                    RA[k:k+nev, k:k+nev] = alpha
+                    RB[k:k+nev, k:k+nev] = beta
+
+                # Store the converged eigenvalues
                 for i in range(nev):
                     print("Found an eigenvalue:", evs[0, i] / evs[1, i])
 
@@ -227,5 +242,20 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
             r = r[:, 0:1]
 
         it += 1
+
+    if return_eigenvectors:
+        evs, v = scipy.linalg.eig(RA[0:k, 0:k], RB[0:k, 0:k], left=False, right=True, homogeneous_eigvals=True)
+
+        if ctype == dtype:
+            return evs[0], evs[1], Q[:, 0:k] @ v
+
+        i = 0
+        while i < k:
+            Z[:, i] = Q[:, 0:k] @ v[:, i].real
+            if evs[0][i].imag:
+                Z[:, i+1] = Q[:, 0:k] @ v[:, i].imag
+                i += 1
+            i += 1
+        return evs[0], evs[1], Z
 
     return aconv[0:num], bconv[0:num]

@@ -8,6 +8,7 @@ from numpy.testing import assert_equal, assert_allclose
 
 from jadapy import jdqz
 from jadapy import Target
+from jadapy.utils import norm
 
 REAL_DTYPES = [numpy.float32, numpy.float64]
 COMPLEX_DTYPES = [numpy.complex64, numpy.complex128]
@@ -327,6 +328,38 @@ def test_jdqz_largest_magnitude_lowdim(dtype):
     assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
     assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
 
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_jdqz_smallest_magnitude_eigenvectors(dtype):
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 1e3
+    atol = tol * 10
+    n = 20
+    k = 5
+    a = generate_test_matrix([n, n], dtype)
+    b = generate_test_matrix([n, n], dtype)
+
+    alpha, beta, v = jdqz.jdqz(a, b, num=k, tol=tol, return_eigenvectors=True)
+    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: abs(x)))
+    jdqz_eigs = jdqz_eigs[:k]
+
+    eigs = scipy.linalg.eigvals(a, b)
+    eigs = numpy.array(sorted(eigs, key=lambda x: abs(x)))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+    i = 0
+    while i < k:
+        ctype = numpy.dtype(numpy.dtype(dtype).char.upper())
+        if dtype != ctype and alpha[i].imag:
+            assert norm(beta[i].real * a @ v[:, i]   - alpha[i].real * b @ v[:, i] + alpha[i].imag * b @ v[:, i+1]) < atol
+            assert norm(beta[i].real * a @ v[:, i+1] - alpha[i].imag * b @ v[:, i] - alpha[i].real * b @ v[:, i+1]) < atol
+            i += 2
+        else:
+            assert norm(beta[i] * a @ v[:, i] - alpha[i] * b @ v[:, i]) < atol
+            i += 1
+
 def generate_Epetra_test_matrix(map, shape, dtype):
     from PyTrilinos import Epetra
     from jadapy import EpetraInterface
@@ -396,3 +429,42 @@ def test_Epetra_lowdim():
 
     assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
     assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+def test_Epetra_eigenvectors():
+    from PyTrilinos import Epetra
+    from jadapy import EpetraInterface
+
+    dtype = numpy.float64
+    numpy.random.seed(12345)
+    tol = numpy.finfo(dtype).eps * 1e3
+    atol = tol * 10
+    n = 20
+    k = 5
+
+    comm = Epetra.PyComm()
+    map = Epetra.Map(n, 0, comm)
+    a1, a2 = generate_Epetra_test_matrix(map, [n, n], dtype)
+    b1, b2 = generate_Epetra_test_matrix(map, [n, n], dtype)
+
+    interface = EpetraInterface.EpetraInterface(map)
+
+    alpha, beta, v = jdqz.jdqz(a2, b2, num=k, tol=tol, return_eigenvectors=True, interface=interface)
+    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: abs(x)))
+    jdqz_eigs = jdqz_eigs[:k]
+
+    eigs = scipy.linalg.eigvals(a1, b1)
+    eigs = numpy.array(sorted(eigs, key=lambda x: abs(x)))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+    i = 0
+    while i < k:
+        if alpha[i].imag:
+            assert norm(a2 @ v[:, i] * beta[i].real   - b2 @ v[:, i] * alpha[i].real + b2 @ v[:, i+1] * alpha[i].imag) < atol
+            assert norm(a2 @ v[:, i+1] * beta[i].real - b2 @ v[:, i] * alpha[i].imag - b2 @ v[:, i+1] * alpha[i].real) < atol
+            i += 2
+        else:
+            assert norm(a2 @ v[:, i] * beta[i].real - b2 @ v[:, i] * alpha[i].real) < atol
+            i += 1
