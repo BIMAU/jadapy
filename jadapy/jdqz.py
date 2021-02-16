@@ -100,6 +100,9 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
     # BV = B*V without orthogonalization
     BV = interface.vector(_subspace_dimensions[1])
 
+    # Residual vector
+    r = interface.vector(1 + extra)
+
     # Low-dimensional projections: WAV = W'*A*V, WBV = W'*B*V
     WAV = numpy.zeros((_subspace_dimensions[1], _subspace_dimensions[1]), dtype)
     WBV = numpy.zeros((_subspace_dimensions[1], _subspace_dimensions[1]), dtype)
@@ -110,7 +113,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
         else:
             V[:, m:m+nev] = solve_generalized_correction_equation(
                 A, B, prec, Q[:, 0:k+nev], Z[:, 0:k+nev], Y[:, 0:k+nev], QZ[0:k+nev, 0:k+nev],
-                evs[0, 0], evs[1, 0], r, solver_tolerance, interface)
+                evs[0, 0], evs[1, 0], r[:, 0:nev], solver_tolerance, interface)
 
         orthonormalize(V[:, 0:m], V[:, m:m+nev])
 
@@ -166,10 +169,10 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
                 QZ[k:k+nev, i] = dot(Q[:, k:k+nev], Y[:, i])
             QZ[k:k+nev, k:k+nev] = dot(Q[:, k:k+nev], Y[:, k:k+nev])
 
-            r = A @ Q[:, k:k+nev] @ beta - B @ Q[:, k:k+nev] @ alpha
-            orthogonalize(Z[:, 0:k+nev], r)
+            r[:, 0:nev] = A @ Q[:, k:k+nev] @ beta - B @ Q[:, k:k+nev] @ alpha
+            orthogonalize(Z[:, 0:k+nev], r[:, 0:nev])
 
-            rnorm = norm(r) / evcond
+            rnorm = norm(r[:, 0:nev]) / evcond
 
             evs = scipy.linalg.eigvals(alpha, beta, homogeneous_eigvals=True)
             ev_est = evs[0, 0] / evs[1, 0]
@@ -239,7 +242,6 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
         elif m + nev - 1 >= min(_subspace_dimensions[1], n - k):
             # Only one extra vector fits in the search space.
             nev = 1
-            r = r[:, 0:1]
 
         it += 1
 
