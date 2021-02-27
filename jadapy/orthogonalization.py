@@ -56,17 +56,20 @@ def normalize(w, nrm=None, verbose=True):
     return nrm
 
 def orthogonalize(V, w=None, W=None, method='DGKS'):
-    if w is None:
-        w = V
-        V = None
+    # Orthogonalize the whole space
+    if w is None and len(V.shape) > 1 and V.shape[1] > 1:
+        nrms = [0] * V.shape[1]
+        for i in range(V.shape[1]):
+            nrm = orthogonalize(None, V[:, i], V[:, 0:i])
+            nrms[i] = normalize(V[:, i], nrm, verbose=False)
+        for i in range(V.shape[1]):
+            V[:, i] *= nrms[i]
+        return
 
+    # Orthogonalize with respect to the basis, not itself
     if len(w.shape) > 1 and w.shape[1] > 1:
-        nrms = [0] * w.shape[1]
         for i in range(w.shape[1]):
-            nrm = orthogonalize(V, w[:, i], w[:, 0:i])
-            nrms[i] = normalize(w[:, i], nrm, verbose=False)
-        for i in range(w.shape[1]):
-            w[:, i] *= nrms[i]
+            orthogonalize(V, w[:, i])
         return
 
     if method == 'Modified Gram-Schmidt' or method == 'MGS':
@@ -78,6 +81,7 @@ def orthonormalize(V, w=None, W=None, method='DGKS'):
         w = V
         V = None
 
+    # Orthonormalize with respect to the basis and itself
     if len(w.shape) > 1 and w.shape[1] > 1:
         for i in range(w.shape[1]):
             orthonormalize(V, w[:, i], w[:, 0:i])
