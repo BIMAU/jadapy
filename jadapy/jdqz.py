@@ -1,3 +1,4 @@
+import sys
 import numpy
 import scipy
 
@@ -177,6 +178,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
             evs = scipy.linalg.eigvals(alpha, beta, homogeneous_eigvals=True)
             ev_est = evs[0, 0] / evs[1, 0]
             print("Step: %4d, subspace dimension: %3d, eigenvalue estimate: %13.6e + %13.6ei, residual norm: %e" % (it, m, ev_est.real, ev_est.imag, rnorm))
+            sys.stdout.flush()
 
             # Store converged Petrov pairs
             if rnorm <= tol:
@@ -192,6 +194,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
                 # Store the converged eigenvalues
                 for i in range(nev):
                     print("Found an eigenvalue:", evs[0, i] / evs[1, i])
+                    sys.stdout.flush()
 
                     aconv[k] = evs[0, i]
                     bconv[k] = evs[1, i].real
@@ -229,6 +232,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
             new_m = min(_subspace_dimensions[0], n - k)
 
             print("Shrinking the search space from %d to %d" % (m, new_m))
+            sys.stdout.flush()
 
             V[:, 0:new_m] = V[:, 0:m] @ UR[:, 0:new_m]
             AV[:, 0:new_m] = AV[:, 0:m] @ UR[:, 0:new_m]
