@@ -28,6 +28,14 @@ class NumPyInterface:
         return generate_random_dtype_array([self.n], self.dtype)
 
     def solve(self, op, x, tol):
+        if op.dtype.char != op.dtype.char.upper():
+            # Real case
+            if abs(op.alpha.real) < abs(op.alpha.imag):
+                op.alpha = op.alpha.imag
+            else:
+                op.alpha = op.alpha.real
+            op.beta = op.beta.real
+
         out = x.copy()
         for i in range(x.shape[1]):
             out[:, i] , info = linalg.gmres(op, x[:, i], restart=100, tol=tol, atol=0)

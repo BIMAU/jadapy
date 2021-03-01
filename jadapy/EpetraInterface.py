@@ -50,6 +50,13 @@ class Vector(Epetra.MultiVector):
             assert len(x.shape) == 1 and x.shape[0] == 1
             x = x[0]
 
+        if numpy.iscomplexobj(x):
+            if self.shape[1] == 2:
+                y = numpy.array([[x.real, x.imag], [-x.imag, x.real]])
+                return self @ y
+            else:
+                x = x.real
+
         tmp = Vector(self)
         tmp.Scale(x)
         return tmp
@@ -144,6 +151,14 @@ class EpetraInterface:
         return tmp
 
     def solve(self, op, rhs, tol):
+        if op.dtype.char != op.dtype.char.upper():
+            # Real case
+            if abs(op.alpha.real) < abs(op.alpha.imag):
+                op.alpha = op.alpha.imag
+            else:
+                op.alpha = op.alpha.real
+            op.beta = op.beta.real
+
         epetra_op = Operator(op)
         x = Vector(rhs)
         solver = AztecOO.AztecOO(epetra_op, x, rhs)
