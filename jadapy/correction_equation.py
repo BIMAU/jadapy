@@ -31,7 +31,7 @@ class generalized_linear_operator(object):
     def matvec(self, x):
         y = self.proj(x)
         y = (self.A @ y) * self.beta - (self.B @ y) * self.alpha
-        y = self.prec(y)
+        y = self.prec(y, self.alpha, self.beta)
         return self.proj(y)
 
     def proj(self, x):
@@ -43,6 +43,6 @@ class generalized_linear_operator(object):
 
 def solve_generalized_correction_equation(A, B, prec, Q, Z, Y, H, alpha, beta, r, tolerance, interface):
     op = generalized_linear_operator(A, B, prec, Q, Z, Y, H, alpha, beta)
-    r = prec(r)
+    r = prec(r, alpha, beta)
     r = op.proj(r)
     return interface.solve(op, -r, tolerance)

@@ -10,7 +10,7 @@ from jadapy.correction_equation import solve_generalized_correction_equation
 from jadapy.utils import dot, norm
 from jadapy.NumPyInterface import NumPyInterface
 
-def _prec(x):
+def _prec(x, *args):
     return x
 
 def _set_testspace(testspace, target, alpha, beta, dtype, ctype):
@@ -162,7 +162,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
             Z[:, k:k+nev] = W[:, 0:m] @ UL[:, 0:nev]
             orthonormalize(Z[:, 0:k], Z[:, k:k+nev])
 
-            Y[:, k:k+nev] = prec(Z[:, k:k+nev])
+            Y[:, k:k+nev] = prec(Z[:, k:k+nev], alpha, beta)
 
             for i in range(k):
                 QZ[i, k:k+nev] = dot(Q[:, i], Y[:, k:k+nev])

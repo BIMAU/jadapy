@@ -254,7 +254,7 @@ def test_jdqz_prec(dtype):
     b = generate_test_matrix([n, n], dtype)
 
     inv = scipy.sparse.linalg.spilu(scipy.sparse.csc_matrix(a))
-    def _prec(x):
+    def _prec(x, *args):
         return inv.solve(x)
 
     alpha, beta = jdqz.jdqz(a, b, num=k, tol=tol, prec=_prec)
