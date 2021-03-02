@@ -206,7 +206,7 @@ def test_jdqz_target(dtype):
     a = generate_test_matrix([n, n], dtype)
     b = generate_test_matrix([n, n], dtype)
 
-    target = Target.Target(complex(2, 1))
+    target = 2 + 1j
     alpha, beta = jdqz.jdqz(a, b, k, target, tol=tol, arithmetic='complex')
     jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: abs(x - target)))
 
@@ -227,7 +227,7 @@ def test_jdqz_target_real(dtype):
     a = generate_test_matrix([n, n], dtype)
     b = generate_test_matrix([n, n], dtype)
 
-    target = Target.Target(complex(2, 1))
+    target = 2 + 1j
     alpha, beta = jdqz.jdqz(a, b, k, target, tol=tol)
     jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: abs(x - target)))
 

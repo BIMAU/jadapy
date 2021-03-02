@@ -184,3 +184,47 @@ def test_generalized_schur_sort_target(dtype):
 
     assert_allclose(q @ s @ z.conj().T, a, rtol=0, atol=atol)
     assert_allclose(q @ t @ z.conj().T, b, rtol=0, atol=atol)
+
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_generalized_schur_sort_target_complex(dtype):
+    atol = numpy.finfo(dtype).eps * 100
+    n = 10
+    a = generate_random_dtype_array([n, n], dtype)
+    b = generate_random_dtype_array([n, n], dtype)
+    s, t, q, z = generalized_schur.generalized_schur(a, b)
+
+    target = 2.0 + 2.0j
+    idx = min(range(n), key=lambda i: abs(_get_ev(s, t, i) - target))
+
+    d1 = _get_ev(s, t, 0)
+    d2 = _get_ev(s, t, idx)
+
+    s, t, q, z = generalized_schur.generalized_schur_sort(s, t, q, z, target)
+
+    assert_allclose(_get_ev(s, t, 0).real, d2.real, rtol=0, atol=atol)
+    assert_allclose(abs(_get_ev(s, t, 0).imag), abs(d2.imag), rtol=0, atol=atol)
+
+    assert_allclose(q @ s @ z.conj().T, a, rtol=0, atol=atol)
+    assert_allclose(q @ t @ z.conj().T, b, rtol=0, atol=atol)
+
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_generalized_schur_sort_target_real(dtype):
+    atol = numpy.finfo(dtype).eps * 100
+    n = 10
+    a = generate_random_dtype_array([n, n], dtype)
+    b = generate_random_dtype_array([n, n], dtype)
+    s, t, q, z = generalized_schur.generalized_schur(a, b)
+
+    target = 2.0
+    idx = min(range(n), key=lambda i: abs(_get_ev(s, t, i) - target))
+
+    d1 = _get_ev(s, t, 0)
+    d2 = _get_ev(s, t, idx)
+
+    s, t, q, z = generalized_schur.generalized_schur_sort(s, t, q, z, target)
+
+    assert_allclose(_get_ev(s, t, 0).real, d2.real, rtol=0, atol=atol)
+    assert_allclose(abs(_get_ev(s, t, 0).imag), abs(d2.imag), rtol=0, atol=atol)
+
+    assert_allclose(q @ s @ z.conj().T, a, rtol=0, atol=atol)
+    assert_allclose(q @ t @ z.conj().T, b, rtol=0, atol=atol)
