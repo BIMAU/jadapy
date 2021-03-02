@@ -1,27 +1,3 @@
-class _TargetType:
-    @staticmethod
-    def __abs__():
-        return 0.0
-
-    @staticmethod
-    def __complex__():
-        return 0.0
-
-    @staticmethod
-    def __neg__():
-        return 0.0
-
-    @staticmethod
-    def conj():
-        return 0.0
-
-SmallestMagnitude = _TargetType()
-LargestMagnitude = _TargetType()
-SmallestRealPart = _TargetType()
-LargestRealPart = _TargetType()
-SmallestImaginaryPart = _TargetType()
-LargestImaginaryPart = _TargetType()
-
 class Target:
     def __init__(self, target):
         self.target = target
@@ -39,4 +15,14 @@ class Target:
         self.target = target
 
     def conj(self):
-        return self.target.conj()
+        try:
+            return self.target.conj()
+        except AttributeError:
+            return self.target
+
+SmallestMagnitude = Target(0.0)
+LargestMagnitude = Target(0.0)
+SmallestRealPart = Target(0.0)
+LargestRealPart = Target(0.0)
+SmallestImaginaryPart = Target(0.0)
+LargestImaginaryPart = Target(0.0)
