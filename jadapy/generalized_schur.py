@@ -85,7 +85,7 @@ def generalized_schur(a, b, output='real', lwork=None, overwrite_a=False, overwr
 
 def _is_target(target, target_type):
     try:
-        return target == target_type or isinstance(target, target_type)
+        return target is target_type or isinstance(target, target_type)
     except TypeError:
         return False
 
@@ -116,7 +116,7 @@ def _select(start, end, a, b, target):
     elif _is_target(target, Target.LargestImaginaryPart):
         idx = max(idx_list, key=lambda i: _get_ev(a, b, i).imag)
     elif _is_target(target, Target.Target):
-        idx = min(idx_list, key=lambda i: abs(_get_ev(a, b, i) - target.target))
+        idx = min(idx_list, key=lambda i: abs(_get_ev(a, b, i) - target))
     return idx
 
 def generalized_schur_sort(a, b, q, z, target):

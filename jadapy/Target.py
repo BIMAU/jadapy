@@ -1,24 +1,8 @@
-class Target:
-    def __init__(self, target):
-        self.target = target
+from numpy import complex128
 
-    def __abs__(self):
-        return abs(self.target)
-
-    def __complex__(self):
-        return self.target
-
-    def __neg__(self):
-        return -self.target
-
-    def __call__(self, target):
-        self.target = target
-
-    def conj(self):
-        try:
-            return self.target.conj()
-        except AttributeError:
-            return self.target
+class Target(complex128):
+    def __new__(cls, *args, **kwargs):
+        return complex128.__new__(cls, *args, **kwargs)
 
 SmallestMagnitude = Target(0.0)
 LargestMagnitude = Target(0.0)

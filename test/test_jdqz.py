@@ -208,10 +208,10 @@ def test_jdqz_target(dtype):
 
     target = Target.Target(complex(2, 1))
     alpha, beta = jdqz.jdqz(a, b, k, target, tol=tol, arithmetic='complex')
-    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: abs(x - target.target)))
+    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: abs(x - target)))
 
     eigs = scipy.linalg.eigvals(a, b)
-    eigs = numpy.array(sorted(eigs, key=lambda x: abs(x - target.target)))
+    eigs = numpy.array(sorted(eigs, key=lambda x: abs(x - target)))
     eigs = eigs[:k]
 
     assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
@@ -229,10 +229,10 @@ def test_jdqz_target_real(dtype):
 
     target = Target.Target(complex(2, 1))
     alpha, beta = jdqz.jdqz(a, b, k, target, tol=tol)
-    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: abs(x - target.target)))
+    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: abs(x - target)))
 
     eigs = scipy.linalg.eigvals(a, b)
-    eigs = numpy.array(sorted(eigs, key=lambda x: abs(x - target.target)))
+    eigs = numpy.array(sorted(eigs, key=lambda x: abs(x - target)))
     eigs = eigs[:k]
 
     # In the real case, we store complex conjugate eigenpairs, so only

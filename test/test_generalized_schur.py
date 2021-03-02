@@ -172,7 +172,7 @@ def test_generalized_schur_sort_target(dtype):
     s, t, q, z = generalized_schur.generalized_schur(a, b)
 
     target = Target.Target(complex(2, 2))
-    idx = min(range(n), key=lambda i: abs(_get_ev(s, t, i) - target.target))
+    idx = min(range(n), key=lambda i: abs(_get_ev(s, t, i) - target))
 
     d1 = _get_ev(s, t, 0)
     d2 = _get_ev(s, t, idx)
