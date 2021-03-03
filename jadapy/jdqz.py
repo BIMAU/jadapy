@@ -53,7 +53,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
 
     n = A.shape[0]
 
-    _subspace_dimensions = (min(subspace_dimensions[0], n // 2), min(subspace_dimensions[1], n))
+    subspace_dimensions = (min(subspace_dimensions[0], n // 2), min(subspace_dimensions[1], n))
 
     it = 1
     k = 0 # Number of eigenvalues found
@@ -91,22 +91,22 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
     QZ = numpy.zeros((num + extra, num + extra), dtype)
 
     # Orthonormal search subspace
-    V = interface.vector(_subspace_dimensions[1])
+    V = interface.vector(subspace_dimensions[1])
     # Orthonormal test subspace
-    W = interface.vector(_subspace_dimensions[1])
+    W = interface.vector(subspace_dimensions[1])
     # Preconditioned orthonormal search subspace
-    Y = interface.vector(_subspace_dimensions[1])
+    Y = interface.vector(subspace_dimensions[1])
     # AV = A*V without orthogonalization
-    AV = interface.vector(_subspace_dimensions[1])
+    AV = interface.vector(subspace_dimensions[1])
     # BV = B*V without orthogonalization
-    BV = interface.vector(_subspace_dimensions[1])
+    BV = interface.vector(subspace_dimensions[1])
 
     # Residual vector
     r = interface.vector(1 + extra)
 
     # Low-dimensional projections: WAV = W'*A*V, WBV = W'*B*V
-    WAV = numpy.zeros((_subspace_dimensions[1], _subspace_dimensions[1]), dtype)
-    WBV = numpy.zeros((_subspace_dimensions[1], _subspace_dimensions[1]), dtype)
+    WAV = numpy.zeros((subspace_dimensions[1], subspace_dimensions[1]), dtype)
+    WBV = numpy.zeros((subspace_dimensions[1], subspace_dimensions[1]), dtype)
 
     while k < num and it <= maxit:
         if it == 1:
@@ -117,7 +117,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
 
             # Build an initial search subspace in an inexpensive way
             # and as close to the target as possible
-            if m < _subspace_dimensions[0]:
+            if m < subspace_dimensions[0]:
                 solver_tolerance = 1.0
                 if target != 0.0:
                     sigma_a = target
@@ -238,9 +238,9 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
 
         solver_tolerance = max(solver_tolerance / 2, tol)
 
-        if m >= min(_subspace_dimensions[1], n - k) and k < num:
+        if m >= min(subspace_dimensions[1], n - k) and k < num:
             # Maximum search space dimension has been reached.
-            new_m = min(_subspace_dimensions[0], n - k)
+            new_m = min(subspace_dimensions[0], n - k)
 
             print("Shrinking the search space from %d to %d" % (m, new_m))
             sys.stdout.flush()
@@ -254,7 +254,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
             WBV[0:new_m, 0:new_m] = T[0:new_m, 0:new_m]
 
             m = new_m
-        elif m + nev - 1 >= min(_subspace_dimensions[1], n - k):
+        elif m + nev - 1 >= min(subspace_dimensions[1], n - k):
             # Only one extra vector fits in the search space.
             nev = 1
 
