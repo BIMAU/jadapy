@@ -1,4 +1,5 @@
 import numpy
+import warnings
 
 from PyTrilinos import Epetra
 from PyTrilinos import AztecOO
@@ -166,6 +167,8 @@ class EpetraInterface:
                               "Precond": "None",
                               "Output": -3}) # Warnings. See az_aztec_defs.h
         info = solver.Iterate(100, tol)
-        if info != 0:
+        if info < 0:
             raise Exception('AztecOO returned ' + str(info))
+        elif info > 0:
+            warnings.warn('GMRES did not converge in ' + str(solver.NumIters()) + 'iterations')
         return x
