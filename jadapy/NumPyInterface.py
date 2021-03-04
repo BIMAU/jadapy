@@ -27,7 +27,7 @@ class NumPyInterface:
     def random(self):
         return generate_random_dtype_array([self.n], self.dtype)
 
-    def solve(self, op, x, tol):
+    def solve(self, op, x, tol, maxit):
         if op.dtype.char != op.dtype.char.upper():
             # Real case
             if abs(op.alpha.real) < abs(op.alpha.imag):
@@ -38,7 +38,7 @@ class NumPyInterface:
 
         out = x.copy()
         for i in range(x.shape[1]):
-            out[:, i] , info = linalg.gmres(op, x[:, i], restart=100, tol=tol, atol=0)
+            out[:, i] , info = linalg.gmres(op, x[:, i], restart=100, maxiter=maxit, tol=tol, atol=0)
             if info < 0:
                 raise Exception('GMRES returned ' + str(info))
             elif info > 0:

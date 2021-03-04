@@ -33,8 +33,8 @@ class generalized_linear_operator(object):
         y = self.Y @ y
         return x - y
 
-def solve_generalized_correction_equation(A, B, prec, Q, Z, Y, H, alpha, beta, r, tolerance, interface):
+def solve_generalized_correction_equation(A, B, prec, Q, Z, Y, H, alpha, beta, r, tolerance, maxit, interface):
     op = generalized_linear_operator(A, B, prec, Q, Z, Y, H, alpha, beta)
     r = prec(r, alpha, beta)
     r = op.proj(r)
-    return interface.solve(op, -r, tolerance)
+    return interface.solve(op, -r, tolerance, maxit)

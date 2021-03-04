@@ -112,6 +112,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
         if it == 1:
             V[:, 0] = interface.random()
         else:
+            solver_maxit = 100
             sigma_a = evs[0, 0]
             sigma_b = evs[1, 0]
 
@@ -119,13 +120,14 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
             # and as close to the target as possible
             if m < subspace_dimensions[0]:
                 solver_tolerance = 1.0
+                solver_maxit = 1
                 if target != 0.0:
                     sigma_a = target
                     sigma_b = 1.0
 
             V[:, m:m+nev] = solve_generalized_correction_equation(
                 A, B, prec, Q[:, 0:k+nev], Z[:, 0:k+nev], Y[:, 0:k+nev], QZ[0:k+nev, 0:k+nev],
-                sigma_a, sigma_b, r[:, 0:nev], solver_tolerance, interface)
+                sigma_a, sigma_b, r[:, 0:nev], solver_tolerance, solver_maxit, interface)
 
         orthonormalize(V[:, 0:m], V[:, m:m+nev])
 

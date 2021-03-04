@@ -151,7 +151,7 @@ class EpetraInterface:
         tmp.Random()
         return tmp
 
-    def solve(self, op, rhs, tol):
+    def solve(self, op, rhs, tol, maxit):
         if op.dtype.char != op.dtype.char.upper():
             # Real case
             if abs(op.alpha.real) < abs(op.alpha.imag):
@@ -166,7 +166,7 @@ class EpetraInterface:
         solver.SetParameters({"Solver": "GMRES",
                               "Precond": "None",
                               "Output": -3}) # Warnings. See az_aztec_defs.h
-        info = solver.Iterate(100, tol)
+        info = solver.Iterate(maxit, tol)
         if info < 0:
             raise Exception('AztecOO returned ' + str(info))
         elif info > 0:
