@@ -42,5 +42,5 @@ class NumPyInterface:
             if info < 0:
                 raise Exception('GMRES returned ' + str(info))
             elif info > 0:
-                warnings.warn('GMRES did not converge in ' + str(info) + 'iterations')
+                warnings.warn('GMRES did not converge in ' + str(info) + ' iterations')
         return out
