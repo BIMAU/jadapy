@@ -119,7 +119,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
             # Build an initial search subspace in an inexpensive way
             # and as close to the target as possible
             if m < subspace_dimensions[0]:
-                solver_tolerance = 1.0
+                solver_tolerance = 0.5
                 solver_maxit = 1
                 if target != 0.0:
                     sigma_a = target

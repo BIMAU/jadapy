@@ -41,6 +41,6 @@ class NumPyInterface:
             out[:, i] , info = linalg.gmres(op, x[:, i], restart=100, maxiter=maxit, tol=tol, atol=0)
             if info < 0:
                 raise Exception('GMRES returned ' + str(info))
-            elif info > 0:
+            elif info > 0 and maxit > 1:
                 warnings.warn('GMRES did not converge in ' + str(info) + ' iterations')
         return out

@@ -169,6 +169,6 @@ class EpetraInterface:
         info = solver.Iterate(maxit, tol)
         if info < 0:
             raise Exception('AztecOO returned ' + str(info))
-        elif info > 0:
+        elif info > 0 and maxit > 1:
             warnings.warn('GMRES did not converge in ' + str(solver.NumIters()) + ' iterations')
         return x

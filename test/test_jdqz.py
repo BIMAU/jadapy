@@ -408,7 +408,7 @@ def test_Epetra_lowdim():
 
     dtype = numpy.float64
     numpy.random.seed(1234)
-    tol = numpy.finfo(dtype).eps * 1e3
+    tol = numpy.finfo(dtype).eps * 1e4
     atol = tol * 10
     n = 20
     k = 5
