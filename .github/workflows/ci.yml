@@ -11,11 +11,11 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: 'ubuntu-lastest'
+          - os: 'ubuntu-latest'
             dependencies: ''
-          - os: 'macos-lastest'
+          - os: 'macos-latest'
             dependencies: ''
-          - os: 'macos-lastest'
+          - os: 'macos-latest'
             dependencies: 'nlesc/nlesc/trilinos'
 
     runs-on: ${{ matrix.os }}
