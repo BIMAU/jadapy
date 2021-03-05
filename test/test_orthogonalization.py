@@ -133,8 +133,11 @@ def test_orthogonalization_no_vectors(dtype, otype):
 
 @pytest.mark.parametrize('otype', OTYPES)
 def test_orthonormalization_multiple_vectors_epetra(otype):
-    from PyTrilinos import Epetra
-    from jadapy import EpetraInterface
+    try:
+        from PyTrilinos import Epetra
+        from jadapy import EpetraInterface
+    except ImportError:
+        pytest.skip("Trilinos not found")
 
     dtype = numpy.float64
     atol = numpy.finfo(dtype).eps * 100
@@ -156,8 +159,11 @@ def test_orthonormalization_multiple_vectors_epetra(otype):
 
 @pytest.mark.parametrize('otype', OTYPES)
 def test_orthogonalization_epetra(otype):
-    from PyTrilinos import Epetra
-    from jadapy import EpetraInterface
+    try:
+        from PyTrilinos import Epetra
+        from jadapy import EpetraInterface
+    except ImportError:
+        pytest.skip("Trilinos not found")
 
     dtype = numpy.float64
     atol = numpy.finfo(dtype).eps * 100

@@ -359,8 +359,11 @@ def test_jdqz_smallest_magnitude_eigenvectors(dtype):
             i += 1
 
 def generate_Epetra_test_matrix(map, shape, dtype):
-    from PyTrilinos import Epetra
-    from jadapy import EpetraInterface
+    try:
+        from PyTrilinos import Epetra
+        from jadapy import EpetraInterface
+    except ImportError:
+        pytest.skip("Trilinos not found")
 
     a1 = generate_test_matrix(shape, dtype)
     a2 = EpetraInterface.CrsMatrix(Epetra.Copy, map, shape[1])
@@ -373,8 +376,11 @@ def generate_Epetra_test_matrix(map, shape, dtype):
     return a1, a2
 
 def test_Epetra():
-    from PyTrilinos import Epetra
-    from jadapy import EpetraInterface
+    try:
+        from PyTrilinos import Epetra
+        from jadapy import EpetraInterface
+    except ImportError:
+        pytest.skip("Trilinos not found")
 
     dtype = numpy.float64
     numpy.random.seed(1234)
@@ -401,8 +407,11 @@ def test_Epetra():
     assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
 
 def test_Epetra_lowdim():
-    from PyTrilinos import Epetra
-    from jadapy import EpetraInterface
+    try:
+        from PyTrilinos import Epetra
+        from jadapy import EpetraInterface
+    except ImportError:
+        pytest.skip("Trilinos not found")
 
     dtype = numpy.float64
     numpy.random.seed(1234)
@@ -429,8 +438,11 @@ def test_Epetra_lowdim():
     assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
 
 def test_Epetra_eigenvectors():
-    from PyTrilinos import Epetra
-    from jadapy import EpetraInterface
+    try:
+        from PyTrilinos import Epetra
+        from jadapy import EpetraInterface
+    except ImportError:
+        pytest.skip("Trilinos not found")
 
     dtype = numpy.float64
     numpy.random.seed(1234)
