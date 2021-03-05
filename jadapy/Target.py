@@ -4,6 +4,7 @@ class Target(complex128):
     def __new__(cls, *args, **kwargs):
         return complex128.__new__(cls, *args, **kwargs)
 
+
 SmallestMagnitude = Target(0.0)
 LargestMagnitude = Target(0.0)
 SmallestRealPart = Target(0.0)

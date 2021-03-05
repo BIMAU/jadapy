@@ -2,7 +2,7 @@ import pytest
 
 import numpy
 
-from numpy.testing import assert_equal, assert_allclose
+from numpy.testing import assert_allclose
 
 from jadapy import orthogonalization
 from jadapy.utils import norm
@@ -14,8 +14,7 @@ OTYPES = ['DGKS', 'MGS']
 
 def generate_random_dtype_array(shape, dtype):
     if dtype in COMPLEX_DTYPES:
-        return (numpy.random.rand(*shape)
-                + numpy.random.rand(*shape) * 1.0j).astype(dtype)
+        return (numpy.random.rand(*shape) + numpy.random.rand(*shape) * 1.0j).astype(dtype)
     return numpy.random.rand(*shape).astype(dtype)
 
 def dot(x, y):
@@ -125,7 +124,6 @@ def test_orthogonalization_multiple_vectors_twice(dtype, otype):
 @pytest.mark.parametrize('dtype', DTYPES)
 @pytest.mark.parametrize('otype', OTYPES)
 def test_orthogonalization_no_vectors(dtype, otype):
-    atol = numpy.finfo(dtype).eps * 100
     n = 20
     x = numpy.ndarray(())
 
@@ -134,7 +132,7 @@ def test_orthogonalization_no_vectors(dtype, otype):
     assert norm(y) > 1
 
 @pytest.mark.parametrize('otype', OTYPES)
-def test_orthonormalization_multiple_vectors(otype):
+def test_orthonormalization_multiple_vectors_epetra(otype):
     from PyTrilinos import Epetra
     from jadapy import EpetraInterface
 

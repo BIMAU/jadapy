@@ -39,7 +39,7 @@ def generalized_schur(a, b, output='real', lwork=None, overwrite_a=False, overwr
 
     overwrite_a = overwrite_a or (_datacopied(a1, a))
     overwrite_b = overwrite_b or (_datacopied(b1, b))
-    gges, = scipy.linalg.get_lapack_funcs(('gges',), (a1,b1,))
+    gges, = scipy.linalg.get_lapack_funcs(('gges',), (a1, b1,))
     if lwork is None or lwork == -1:
         # get optimal work array
         result = gges(lambda x: None, a1, b1, lwork=-1)
@@ -123,7 +123,7 @@ def generalized_schur_sort(a, b, q, z, target):
     n = a.shape[0]
 
     try:
-        tgexc, = scipy.linalg.get_lapack_funcs(('tgexc',), (a,b,))
+        tgexc, = scipy.linalg.get_lapack_funcs(('tgexc',), (a, b,))
         for i in range(n):
             if i > 0 and a[i, i - 1] != 0:
                 # Complex conjugate eigenpair
@@ -144,7 +144,7 @@ def generalized_schur_sort(a, b, q, z, target):
 
         return a, b, q, z
     except ValueError:
-        tgsen, = scipy.linalg.get_lapack_funcs(('tgsen',), (a,b,))
+        tgsen, = scipy.linalg.get_lapack_funcs(('tgsen',), (a, b,))
         idx = _select(0, n, a, b, target)
 
         select = numpy.zeros(n)

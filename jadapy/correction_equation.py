@@ -1,5 +1,4 @@
 import numpy
-import scipy
 
 from jadapy.utils import dot
 

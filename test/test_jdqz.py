@@ -2,9 +2,7 @@ import pytest
 import numpy
 import scipy
 
-from math import sqrt
-
-from numpy.testing import assert_equal, assert_allclose
+from numpy.testing import assert_allclose
 
 from jadapy import jdqz
 from jadapy import Target
@@ -16,8 +14,7 @@ DTYPES = REAL_DTYPES + COMPLEX_DTYPES
 
 def generate_random_dtype_array(shape, dtype):
     if dtype in COMPLEX_DTYPES:
-        return (numpy.random.rand(*shape)
-                + numpy.random.rand(*shape) * 1.0j).astype(dtype)
+        return (numpy.random.rand(*shape) + numpy.random.rand(*shape) * 1.0j).astype(dtype)
     return numpy.random.rand(*shape).astype(dtype)
 
 def generate_test_matrix(shape, dtype):
@@ -254,6 +251,7 @@ def test_jdqz_prec(dtype):
     b = generate_test_matrix([n, n], dtype)
 
     inv = scipy.sparse.linalg.spilu(scipy.sparse.csc_matrix(a))
+
     def _prec(x, *args):
         return inv.solve(x)
 
@@ -353,7 +351,7 @@ def test_jdqz_smallest_magnitude_eigenvectors(dtype):
     while i < k:
         ctype = numpy.dtype(numpy.dtype(dtype).char.upper())
         if dtype != ctype and alpha[i].imag:
-            assert norm(beta[i].real * a @ v[:, i]   - alpha[i].real * b @ v[:, i] + alpha[i].imag * b @ v[:, i+1]) < atol
+            assert norm(beta[i].real * a @ v[:, i] - alpha[i].real * b @ v[:, i] + alpha[i].imag * b @ v[:, i+1]) < atol
             assert norm(beta[i].real * a @ v[:, i+1] - alpha[i].imag * b @ v[:, i] - alpha[i].real * b @ v[:, i+1]) < atol
             i += 2
         else:
@@ -462,7 +460,7 @@ def test_Epetra_eigenvectors():
     i = 0
     while i < k:
         if alpha[i].imag:
-            assert norm(a2 @ v[:, i] * beta[i].real   - b2 @ v[:, i] * alpha[i].real + b2 @ v[:, i+1] * alpha[i].imag) < atol
+            assert norm(a2 @ v[:, i] * beta[i].real - b2 @ v[:, i] * alpha[i].real + b2 @ v[:, i+1] * alpha[i].imag) < atol
             assert norm(a2 @ v[:, i+1] * beta[i].real - b2 @ v[:, i] * alpha[i].imag - b2 @ v[:, i+1] * alpha[i].real) < atol
             i += 2
         else:

@@ -9,8 +9,7 @@ DTYPES = REAL_DTYPES + COMPLEX_DTYPES
 
 def generate_random_dtype_array(shape, dtype):
     if dtype in COMPLEX_DTYPES:
-        return (numpy.random.rand(*shape)
-                + numpy.random.rand(*shape) * 1.0j).astype(dtype, copy=False)
+        return (numpy.random.rand(*shape) + numpy.random.rand(*shape) * 1.0j).astype(dtype, copy=False)
     return numpy.random.rand(*shape).astype(dtype, copy=False)
 
 class NumPyInterface:
@@ -39,7 +38,7 @@ class NumPyInterface:
 
         out = x.copy()
         for i in range(x.shape[1]):
-            out[:, i] , info = linalg.gmres(op, x[:, i], restart=100, maxiter=maxit, tol=tol, atol=0)
+            out[:, i], info = linalg.gmres(op, x[:, i], restart=100, maxiter=maxit, tol=tol, atol=0)
             if info < 0:
                 raise Exception('GMRES returned ' + str(info))
             elif info > 0 and maxit > 1:
