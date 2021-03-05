@@ -18,7 +18,7 @@ jobs:
           - os: 'macos-lastest'
             dependencies: 'nlesc/nlesc/trilinos'
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v2
@@ -35,14 +35,14 @@ jobs:
     
     - name: Install Linux dependencies
       run: |
-        brew tap nlesc/nlesc
-        brew install ${{ matrix.dependencies }}
-      if: matrix.dependencies != '' && matrix.os != 'macos-latest'
+        sudo apt-get install ${{ matrix.dependencies }}
+      if: ${{ matrix.os != 'macos-latest' && matrix.dependencies != '' }}
     
     - name: Install macOS dependencies
       run: |
-        sudo apt-get install ${{ matrix.dependencies }}
-      if: matrix.dependencies != '' && matrix.os == 'macos-latest'
+        brew tap nlesc/nlesc
+        brew install ${{ matrix.dependencies }}
+      if: ${{ matrix.os == 'macos-latest' && matrix.dependencies != '' }}
 
     - name: Lint with flake8
       run: |
