@@ -316,7 +316,7 @@ def test_jdqz_largest_magnitude_lowdim(dtype):
     a = generate_test_matrix([n, n], dtype)
     b = generate_test_matrix([n, n], dtype)
 
-    alpha, beta = jdqz.jdqz(a, b, k, Target.LargestMagnitude, tol=tol, subspace_dimensions=[10, 17])
+    alpha, beta = jdqz.jdqz(a, b, k, Target.LargestMagnitude, tol=tol, subspace_dimensions=[10, 18])
     jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: -abs(x)))
 
     eigs = scipy.linalg.eigvals(a, b)
@@ -427,7 +427,7 @@ def test_Epetra_lowdim():
 
     interface = EpetraInterface.EpetraInterface(map)
 
-    alpha, beta = jdqz.jdqz(a2, b2, k, Target.LargestMagnitude, tol=tol, subspace_dimensions=[10, 17], interface=interface)
+    alpha, beta = jdqz.jdqz(a2, b2, k, Target.LargestMagnitude, tol=tol, subspace_dimensions=[10, 18], interface=interface)
     jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: -abs(x)))
 
     eigs = scipy.linalg.eigvals(a1, b1)
