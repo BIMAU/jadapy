@@ -312,7 +312,7 @@ def test_jdqz_largest_magnitude_lowdim(dtype):
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
-    k = 5
+    k = 2
     a = generate_test_matrix([n, n], dtype)
     b = generate_test_matrix([n, n], dtype)
 
@@ -415,10 +415,10 @@ def test_Epetra_lowdim():
 
     dtype = numpy.float64
     numpy.random.seed(1234)
-    tol = numpy.finfo(dtype).eps * 1e4
+    tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
-    k = 5
+    k = 2
 
     comm = Epetra.PyComm()
     map = Epetra.Map(n, 0, comm)
