@@ -15,8 +15,8 @@ jobs:
             dependencies: ''
           - os: 'macos-latest'
             dependencies: ''
-          - os: 'macos-latest'
-            dependencies: 'nlesc/nlesc/trilinos'
+#          - os: 'macos-latest'
+#            dependencies: 'nlesc/nlesc/trilinos'
 
     runs-on: ${{ matrix.os }}
 
