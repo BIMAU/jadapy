@@ -316,7 +316,7 @@ def test_jdqz_largest_magnitude_lowdim(dtype):
     a = generate_test_matrix([n, n], dtype)
     b = generate_test_matrix([n, n], dtype)
 
-    alpha, beta = jdqz.jdqz(a, b, k, Target.LargestMagnitude, tol=tol, subspace_dimensions=[10, 18])
+    alpha, beta = jdqz.jdqz(a, b, k, Target.LargestMagnitude, tol=tol, subspace_dimensions=[10, 16])
     jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: -abs(x)))
 
     eigs = scipy.linalg.eigvals(a, b)

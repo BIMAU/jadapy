@@ -172,11 +172,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
             evcond = sqrt(norm(alpha) ** 2 + norm(beta) ** 2)
 
             Q[:, k:k+nev] = V[:, 0:m] @ UR[:, 0:nev]
-            orthonormalize(Q[:, 0:k], Q[:, k:k+nev])
-
             Z[:, k:k+nev] = W[:, 0:m] @ UL[:, 0:nev]
-            orthonormalize(Z[:, 0:k], Z[:, k:k+nev])
-
             Y[:, k:k+nev] = prec(Z[:, k:k+nev], alpha, beta)
 
             for i in range(k):
