@@ -95,9 +95,9 @@ def _get_ev(a, b, i):
 
     n = a.shape[0]
     if i > 0 and a[i, i - 1] != 0:
-        return scipy.linalg.eig(a[i-1:i+1, i-1:i+1], b[i-1:i+1, i-1:i+1])[0][1]
+        return scipy.linalg.eigvals(a[i-1:i+1, i-1:i+1], b[i-1:i+1, i-1:i+1])[1]
     elif i < n - 1 and a[i + 1, i] != 0:
-        return scipy.linalg.eig(a[i:i+2, i:i+2], b[i:i+2, i:i+2])[0][0]
+        return scipy.linalg.eigvals(a[i:i+2, i:i+2], b[i:i+2, i:i+2])[0]
     return a[i, i] / b[i, i]
 
 def _select(start, end, a, b, target):
