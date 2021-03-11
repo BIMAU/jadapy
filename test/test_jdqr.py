@@ -17,6 +17,11 @@ def generate_random_dtype_array(shape, dtype):
         return (numpy.random.rand(*shape) + numpy.random.rand(*shape) * 1.0j).astype(dtype)
     return numpy.random.rand(*shape).astype(dtype)
 
+def generate_mass_matrix(shape, dtype):
+    x = numpy.zeros(shape, dtype)
+    numpy.fill_diagonal(x, numpy.random.rand(shape[0]))
+    return x
+
 def generate_test_matrix(shape, dtype):
     a = generate_random_dtype_array(shape, dtype)
     a += 3 * numpy.diag(numpy.ones([shape[0]], dtype))
@@ -35,6 +40,26 @@ def test_jdqr_smallest_magnitude(dtype):
     jdqr_eigs = numpy.array(sorted(alpha, key=lambda x: abs(x)))
 
     eigs = scipy.linalg.eigvals(a)
+    eigs = numpy.array(sorted(eigs, key=lambda x: abs(x)))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqr_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqr_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_jdqr_smallest_magnitude_with_mass(dtype):
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 1e3
+    atol = tol * 10
+    n = 20
+    k = 5
+    a = generate_test_matrix([n, n], dtype)
+    m = generate_mass_matrix([n, n], dtype)
+
+    alpha = jdqr.jdqr(a, num=k, tol=tol, M=m)
+    jdqr_eigs = numpy.array(sorted(alpha, key=lambda x: abs(x)))
+
+    eigs = scipy.linalg.eigvals(a, m)
     eigs = numpy.array(sorted(eigs, key=lambda x: abs(x)))
     eigs = eigs[:k]
 

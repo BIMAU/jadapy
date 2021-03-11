@@ -5,14 +5,14 @@ import scipy
 from jadapy import Target
 from jadapy.schur import schur, schur_sort
 from jadapy.orthogonalization import orthogonalize, orthonormalize
-from jadapy.correction_equation import solve_correction_equation
+from jadapy.correction_equation import solve_correction_equation, solve_generalized_correction_equation
 from jadapy.utils import dot, norm
 from jadapy.NumPyInterface import NumPyInterface
 
 def _prec(x, *args):
     return x
 
-def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
+def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
          maxit=1000, subspace_dimensions=(20, 40), arithmetic='real',
          return_eigenvectors=False, interface=None):
 
@@ -60,6 +60,10 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
     Q = interface.vector(num + extra)
     H = numpy.zeros((num + extra, num + extra), dtype)
 
+    MQ = Q
+    if M is not None:
+        MQ = interface.vector(num + extra)
+
     # Orthonormal search subspace
     V = interface.vector(subspace_dimensions[1])
     # Preconditioned orthonormal search subspace
@@ -88,11 +92,16 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
                 if target != 0.0:
                     sigma = target
 
-            V[:, m:m+nev] = solve_correction_equation(
-                A, prec, Q[:, 0:k+nev], Y[:, 0:k+nev], H[0:k+nev, 0:k+nev],
-                sigma, r[:, 0:nev], solver_tolerance, solver_maxit, interface)
+            if M is not None:
+                V[:, m:m+nev] = solve_generalized_correction_equation(
+                    A, M, prec, Q[:, 0:k+nev], MQ[:, 0:k+nev], Y[:, 0:k+nev], H[0:k+nev, 0:k+nev],
+                    sigma, 1.0, r[:, 0:nev], solver_tolerance, solver_maxit, interface)
+            else:
+                V[:, m:m+nev] = solve_correction_equation(
+                    A, prec, Q[:, 0:k+nev], Y[:, 0:k+nev], H[0:k+nev, 0:k+nev],
+                    sigma, r[:, 0:nev], solver_tolerance, solver_maxit, interface)
 
-        orthonormalize(V[:, 0:m], V[:, m:m+nev])
+        orthonormalize(V[:, 0:m], V[:, m:m+nev], M=M)
 
         AV[:, m:m+nev] = A @ V[:, m:m+nev]
 
@@ -120,15 +129,19 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
             evcond = norm(alpha)
 
             Q[:, k:k+nev] = V[:, 0:m] @ U[:, 0:nev]
-            Y[:, k:k+nev] = prec(Q[:, k:k+nev], alpha)
+
+            if M is not None:
+                MQ[:, k:k+nev] = M @ Q[:, k:k+nev]
+
+            Y[:, k:k+nev] = prec(MQ[:, k:k+nev], alpha)
 
             for i in range(k):
                 H[i, k:k+nev] = dot(Q[:, i], Y[:, k:k+nev])
                 H[k:k+nev, i] = dot(Q[:, k:k+nev], Y[:, i])
             H[k:k+nev, k:k+nev] = dot(Q[:, k:k+nev], Y[:, k:k+nev])
 
-            r[:, 0:nev] = A @ Q[:, k:k+nev] - Q[:, k:k+nev] @ alpha
-            orthogonalize(Q[:, 0:k+nev], r[:, 0:nev])
+            r[:, 0:nev] = A @ Q[:, k:k+nev] - MQ[:, k:k+nev] @ alpha
+            orthogonalize(Q[:, 0:k+nev], r[:, 0:nev], M=M)
 
             rnorm = norm(r[:, 0:nev]) / evcond
 
