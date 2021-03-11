@@ -17,6 +17,11 @@ def generate_random_dtype_array(shape, dtype):
         return (numpy.random.rand(*shape) + numpy.random.rand(*shape) * 1.0j).astype(dtype)
     return numpy.random.rand(*shape).astype(dtype)
 
+def generate_random_mass_matrix(shape, dtype):
+    x = numpy.zeros(shape, dtype)
+    numpy.fill_diagonal(x, numpy.random.rand(shape[0]))
+    return x
+
 def dot(x, y):
     return x.T.conj() @ y
 
@@ -56,6 +61,22 @@ def test_orthonormalization_multiple_vectors(dtype, otype):
                 continue
             assert_allclose(dot(x[:, i], x[:, j]), 0, rtol=0, atol=atol)
         assert_allclose(norm(x[:, i]), 1, rtol=0, atol=atol)
+
+@pytest.mark.parametrize('dtype', DTYPES)
+@pytest.mark.parametrize('otype', OTYPES)
+def test_orthonormalization_multiple_vectors_with_mass(dtype, otype):
+    atol = numpy.finfo(dtype).eps * 100
+    n = 20
+    k = 5
+    x = generate_random_dtype_array([n, k], dtype)
+    M = generate_random_mass_matrix([n, n], dtype)
+    orthogonalization.orthonormalize(x, method=otype, M=M)
+    for i in range(k):
+        for j in range(k):
+            if i == j:
+                continue
+            assert_allclose(dot(x[:, i], M @ x[:, j]), 0, rtol=0, atol=atol)
+        assert_allclose(norm(x[:, i], M), 1, rtol=0, atol=atol)
 
 @pytest.mark.parametrize('dtype', DTYPES)
 @pytest.mark.parametrize('otype', OTYPES)
@@ -101,6 +122,21 @@ def test_orthogonalization_multiple_vectors(dtype, otype):
             if i == j:
                 continue
             assert_allclose(dot(x[:, i], x[:, j]), 0, rtol=0, atol=atol)
+
+@pytest.mark.parametrize('dtype', DTYPES)
+@pytest.mark.parametrize('otype', OTYPES)
+def test_orthogonalization_multiple_vectors_with_mass(dtype, otype):
+    atol = numpy.finfo(dtype).eps * 100
+    n = 20
+    k = 5
+    x = generate_random_dtype_array([n, k], dtype)
+    M = generate_random_mass_matrix([n, n], dtype)
+    orthogonalization.orthogonalize(x, method=otype, M=M)
+    for i in range(k):
+        for j in range(k):
+            if i == j:
+                continue
+            assert_allclose(dot(x[:, i], M @ x[:, j]), 0, rtol=0, atol=atol)
 
 @pytest.mark.parametrize('dtype', DTYPES)
 @pytest.mark.parametrize('otype', OTYPES)

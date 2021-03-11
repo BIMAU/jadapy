@@ -8,13 +8,18 @@ def dot(x, y):
     except AttributeError:
         return x.dot(y)
 
-def norm(x):
+def norm(x, M=None):
+    def applyM(x):
+        if M is not None:
+            return M @ x
+        return x
+
     if len(x.shape) < 2 or x.shape[1] < 2:
-        return sqrt(dot(x, x).real)
+        return sqrt(dot(x, applyM(x)).real)
 
     s = 0
     for i in range(x.shape[1]):
-        s += dot(x[:, i], x[:, i]).real
+        s += dot(x[:, i], applyM(x[:, i])).real
     return sqrt(s)
 
 def eps(x):
