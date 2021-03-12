@@ -195,9 +195,12 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
             if rnorm <= tol:
                 # Compute RA and RB so we can compute the eigenvectors
                 if return_eigenvectors:
-                    for i in range(k):
-                        RA[i, k:k+nev] = dot(Z[:, i], A @ Q[:, k:k+nev])
-                        RB[i, k:k+nev] = dot(Z[:, i], B @ Q[:, k:k+nev])
+                    if k > 0:
+                        AQ = AV[:, 0:m] @ UR[:, 0:nev]
+                        BQ = BV[:, 0:m] @ UR[:, 0:nev]
+                        for i in range(k):
+                            RA[i, k:k+nev] = dot(Z[:, i], AQ)
+                            RB[i, k:k+nev] = dot(Z[:, i], BQ)
 
                     RA[k:k+nev, k:k+nev] = alpha
                     RB[k:k+nev, k:k+nev] = beta
