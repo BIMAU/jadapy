@@ -99,6 +99,47 @@ def test_orthonormalization_multiple_vectors_twice(dtype, otype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 @pytest.mark.parametrize('otype', OTYPES)
+def test_orthonormalization_multiple_vectors_twice_with_mass(dtype, otype):
+    atol = numpy.finfo(dtype).eps * 100
+    n = 20
+    k = 5
+    x = generate_random_dtype_array([n, k], dtype)
+    M = generate_random_mass_matrix([n, n], dtype)
+    orthogonalization.orthonormalize(x, method=otype, M=M)
+
+    y = generate_random_dtype_array([n, k], dtype)
+    orthogonalization.orthonormalize(x, y, method=otype, M=M)
+    for i in range(k):
+        for j in range(k):
+            assert_allclose(dot(x[:, i], M @ y[:, j]), 0, rtol=0, atol=atol)
+            if i == j:
+                continue
+            assert_allclose(dot(y[:, i], M @ y[:, j]), 0, rtol=0, atol=atol)
+        assert_allclose(norm(y[:, i], M), 1, rtol=0, atol=atol)
+
+@pytest.mark.parametrize('dtype', DTYPES)
+@pytest.mark.parametrize('otype', OTYPES)
+def test_orthonormalization_multiple_vectors_twice_with_mass_optim(dtype, otype):
+    atol = numpy.finfo(dtype).eps * 100
+    n = 20
+    k = 5
+    x = generate_random_dtype_array([n, k], dtype)
+    M = generate_random_mass_matrix([n, n], dtype)
+    orthogonalization.orthonormalize(x, method=otype, M=M)
+
+    Mx = M @ x
+    y = generate_random_dtype_array([n, k], dtype)
+    orthogonalization.orthonormalize(x, y, method=otype, M=M, MV=Mx)
+    for i in range(k):
+        for j in range(k):
+            assert_allclose(dot(x[:, i], M @ y[:, j]), 0, rtol=0, atol=atol)
+            if i == j:
+                continue
+            assert_allclose(dot(y[:, i], M @ y[:, j]), 0, rtol=0, atol=atol)
+        assert_allclose(norm(y[:, i], M), 1, rtol=0, atol=atol)
+
+@pytest.mark.parametrize('dtype', DTYPES)
+@pytest.mark.parametrize('otype', OTYPES)
 def test_orthogonalization(dtype, otype):
     atol = numpy.finfo(dtype).eps * 100
     n = 20
@@ -108,35 +149,6 @@ def test_orthogonalization(dtype, otype):
     y = generate_random_dtype_array([n], dtype)
     orthogonalization.orthogonalize(x, y, method=otype)
     assert_allclose(dot(x, y), 0, rtol=0, atol=atol)
-
-@pytest.mark.parametrize('dtype', DTYPES)
-@pytest.mark.parametrize('otype', OTYPES)
-def test_orthogonalization_multiple_vectors(dtype, otype):
-    atol = numpy.finfo(dtype).eps * 100
-    n = 20
-    k = 5
-    x = generate_random_dtype_array([n, k], dtype)
-    orthogonalization.orthogonalize(x, method=otype)
-    for i in range(k):
-        for j in range(k):
-            if i == j:
-                continue
-            assert_allclose(dot(x[:, i], x[:, j]), 0, rtol=0, atol=atol)
-
-@pytest.mark.parametrize('dtype', DTYPES)
-@pytest.mark.parametrize('otype', OTYPES)
-def test_orthogonalization_multiple_vectors_with_mass(dtype, otype):
-    atol = numpy.finfo(dtype).eps * 100
-    n = 20
-    k = 5
-    x = generate_random_dtype_array([n, k], dtype)
-    M = generate_random_mass_matrix([n, n], dtype)
-    orthogonalization.orthogonalize(x, method=otype, M=M)
-    for i in range(k):
-        for j in range(k):
-            if i == j:
-                continue
-            assert_allclose(dot(x[:, i], M @ x[:, j]), 0, rtol=0, atol=atol)
 
 @pytest.mark.parametrize('dtype', DTYPES)
 @pytest.mark.parametrize('otype', OTYPES)
@@ -152,6 +164,26 @@ def test_orthogonalization_multiple_vectors_twice(dtype, otype):
     for i in range(k):
         for j in range(k):
             assert_allclose(dot(x[:, i], y[:, j]), 0, rtol=0, atol=atol)
+            if i == j:
+                continue
+            # Not orthogonalized with respect to itself
+            # assert_allclose(dot(y[:, i], y[:, j]), 0, rtol=0, atol=atol)
+
+@pytest.mark.parametrize('dtype', DTYPES)
+@pytest.mark.parametrize('otype', OTYPES)
+def test_orthogonalization_multiple_vectors_twice_with_mass(dtype, otype):
+    atol = numpy.finfo(dtype).eps * 100
+    n = 20
+    k = 5
+    x = generate_random_dtype_array([n, k], dtype)
+    M = generate_random_mass_matrix([n, n], dtype)
+    orthogonalization.orthonormalize(x, method=otype, M=M)
+
+    y = generate_random_dtype_array([n, k], dtype)
+    orthogonalization.orthogonalize(x, y, method=otype, M=M)
+    for i in range(k):
+        for j in range(k):
+            assert_allclose(dot(x[:, i], M @ y[:, j]), 0, rtol=0, atol=atol)
             if i == j:
                 continue
             # Not orthogonalized with respect to itself
@@ -192,28 +224,3 @@ def test_orthonormalization_multiple_vectors_epetra(otype):
                 continue
             assert_allclose(x[:, i].dot(x[:, j]), 0, rtol=0, atol=atol)
         assert_allclose(norm(x[:, i]), 1, rtol=0, atol=atol)
-
-@pytest.mark.parametrize('otype', OTYPES)
-def test_orthogonalization_epetra(otype):
-    try:
-        from PyTrilinos import Epetra
-        from jadapy import EpetraInterface
-    except ImportError:
-        pytest.skip("Trilinos not found")
-
-    dtype = numpy.float64
-    atol = numpy.finfo(dtype).eps * 100
-    n = 20
-    k = 5
-
-    comm = Epetra.PyComm()
-    map = Epetra.Map(n, 0, comm)
-    x = EpetraInterface.Vector(map, k)
-    x.Random()
-
-    orthogonalization.orthogonalize(x, method=otype)
-    for i in range(k):
-        for j in range(k):
-            if i == j:
-                continue
-            assert_allclose(x[:, i].dot(x[:, j]), 0, rtol=0, atol=atol)

@@ -2,49 +2,54 @@ from math import sqrt
 
 from jadapy.utils import dot, norm, eps
 
-def _proj(x, y, M):
+def _proj(x, y, z=None):
     if x is None:
         return
 
-    z = x
-    if M is not None:
-        z = M @ x
+    if z is None:
+        z = x
 
     try:
         y -= x @ dot(z, y)
     except ValueError:
         y -= x * z.conj().dot(y)
 
-def DGKS(V, w, W=None, M=None):
+def DGKS(V, w, W=None, M=None, MV=None, MW=None):
     prev_nrm = norm(w, M)
-    _proj(V, w, M)
-    _proj(W, w, M)
+    _proj(V, w, MV)
+    _proj(W, w, MW)
 
     nrm = norm(w, M)
 
     eta = 1 / sqrt(2)
     while nrm < eta * prev_nrm:
-        _proj(V, w, M)
-        _proj(W, w, M)
+        _proj(V, w, MV)
+        _proj(W, w, MW)
         prev_nrm = nrm
         nrm = norm(w, M)
 
     return nrm
 
-def modified_gs(V, w, W=None, M=None):
+def modified_gs(V, w, W=None, M=None, MV=None, MW=None):
     if V is not None:
         if len(V.shape) > 1:
             for i in range(V.shape[1]):
-                _proj(V[:, i], w, M)
+                if MV is not None:
+                    _proj(V[:, i], w, MV[:, i])
+                else:
+                    _proj(V[:, i], w)
         else:
-            _proj(V, w, M)
+            _proj(V, w, MV)
 
     if W is not None:
         if len(W.shape) > 1:
             for i in range(W.shape[1]):
-                _proj(W[:, i], w, M)
+                if MW is not None:
+                    _proj(W[:, i], w, MW[:, i])
+                else:
+                    _proj(W[:, i], w)
         else:
-            _proj(W, w, M)
+            _proj(W, w, MW)
 
     return None
 
@@ -59,37 +64,40 @@ def normalize(w, nrm=None, M=None, verbose=True):
     w /= nrm
     return nrm
 
-def orthogonalize(V, w=None, W=None, M=None, method='DGKS'):
-    # Orthogonalize the whole space
-    if w is None and len(V.shape) > 1 and V.shape[1] > 1:
-        nrms = [0] * V.shape[1]
-        for i in range(V.shape[1]):
-            nrm = orthogonalize(None, V[:, i], V[:, 0:i], M, method)
-            nrms[i] = normalize(V[:, i], nrm, M, verbose=False)
-        for i in range(V.shape[1]):
-            V[:, i] *= nrms[i]
-        return
+def orthogonalize(V, w, W=None, M=None, MV=None, MW=None, method='DGKS'):
+    if M is not None and V is not None and MV is None:
+        MV = M @ V
+
+    if M is not None and MW is not None and MW is None:
+        MW = M @ W
 
     # Orthogonalize with respect to the basis, not itself
     if len(w.shape) > 1 and w.shape[1] > 1:
         for i in range(w.shape[1]):
-            orthogonalize(V, w[:, i], W, M, method)
+            orthogonalize(V, w[:, i], W, M, MV, MW, method)
         return
 
     if method == 'Modified Gram-Schmidt' or method == 'MGS':
-        return modified_gs(V, w, W, M)
-    return DGKS(V, w, W, M)
+        return modified_gs(V, w, W, M, MV, MW)
+    return DGKS(V, w, W, M, MV, MW)
 
-def orthonormalize(V, w=None, W=None, M=None, method='DGKS'):
+def orthonormalize(V, w=None, W=None, M=None, MV=None, MW=None, method='DGKS'):
     if w is None:
         w = V
         V = None
+        MV = None
+
+    if M is not None and V is not None and MV is None:
+        MV = M @ V
+
+    if M is not None and W is not None and MW is None:
+        MW = M @ W
 
     # Orthonormalize with respect to the basis and itself
     if len(w.shape) > 1 and w.shape[1] > 1:
         for i in range(w.shape[1]):
-            orthonormalize(V, w[:, i], w[:, 0:i], M, method)
+            orthonormalize(V, w[:, i], w[:, 0:i], M, MV, MW, method)
         return
 
-    nrm = orthogonalize(V, w, W, M, method)
+    nrm = orthogonalize(V, w, W, M, MV, MW, method)
     normalize(w, nrm, M)
