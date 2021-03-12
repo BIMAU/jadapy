@@ -71,6 +71,11 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
     # AV = A*V without orthogonalization
     AV = interface.vector(subspace_dimensions[1])
 
+    # MV = M*V without orthogonalization
+    MV = None
+    if M is not None:
+        MV = interface.vector(subspace_dimensions[1])
+
     # Residual vector
     r = interface.vector(1 + extra)
 
@@ -94,16 +99,18 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
 
             if M is not None:
                 V[:, m:m+nev] = solve_generalized_correction_equation(
-                    A, M, prec, Q[:, 0:k+nev], MQ[:, 0:k+nev], Y[:, 0:k+nev], H[0:k+nev, 0:k+nev],
+                    A, M, prec, MQ[:, 0:k+nev], Q[:, 0:k+nev], Y[:, 0:k+nev], H[0:k+nev, 0:k+nev],
                     sigma, 1.0, r[:, 0:nev], solver_tolerance, solver_maxit, interface)
             else:
                 V[:, m:m+nev] = solve_correction_equation(
                     A, prec, Q[:, 0:k+nev], Y[:, 0:k+nev], H[0:k+nev, 0:k+nev],
                     sigma, r[:, 0:nev], solver_tolerance, solver_maxit, interface)
 
-        orthonormalize(V[:, 0:m], V[:, m:m+nev], M=M)
+        orthonormalize(V[:, 0:m], V[:, m:m+nev], M=M, MV=None if MV is None else MV[:, 0:m])
 
         AV[:, m:m+nev] = A @ V[:, m:m+nev]
+        if M is not None:
+            MV[:, m:m+nev] = M @ V[:, m:m+nev]
 
         # Update VAV = V' * A * V
         for i in range(m):
@@ -129,19 +136,18 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
             evcond = norm(alpha)
 
             Q[:, k:k+nev] = V[:, 0:m] @ U[:, 0:nev]
+            Y[:, k:k+nev] = prec(Q[:, k:k+nev], alpha)
 
             if M is not None:
-                MQ[:, k:k+nev] = M @ Q[:, k:k+nev]
-
-            Y[:, k:k+nev] = prec(MQ[:, k:k+nev], alpha)
+                MQ[:, k:k+nev] = MV[:, 0:m] @ U[:, 0:nev]
 
             for i in range(k):
-                H[i, k:k+nev] = dot(Q[:, i], Y[:, k:k+nev])
-                H[k:k+nev, i] = dot(Q[:, k:k+nev], Y[:, i])
-            H[k:k+nev, k:k+nev] = dot(Q[:, k:k+nev], Y[:, k:k+nev])
+                H[i, k:k+nev] = dot(MQ[:, i], Y[:, k:k+nev])
+                H[k:k+nev, i] = dot(MQ[:, k:k+nev], Y[:, i])
+            H[k:k+nev, k:k+nev] = dot(MQ[:, k:k+nev], Y[:, k:k+nev])
 
             r[:, 0:nev] = A @ Q[:, k:k+nev] - MQ[:, k:k+nev] @ alpha
-            orthogonalize(Q[:, 0:k+nev], r[:, 0:nev], M=M)
+            orthogonalize(MQ[:, 0:k+nev], r[:, 0:nev], M=None, MV=Q[:, 0:k+nev])
 
             rnorm = norm(r[:, 0:nev]) / evcond
 
@@ -155,8 +161,10 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
             if rnorm <= tol:
                 # Compute R so we can compute the eigenvectors
                 if return_eigenvectors:
-                    for i in range(k):
-                        R[i, k:k+nev] = dot(Q[:, i], A @ Q[:, k:k+nev])
+                    if k > 0:
+                        AQ = AV[:, 0:m] @ U[:, 0:nev]
+                        for i in range(k):
+                            R[i, k:k+nev] = dot(Q[:, i], AQ)
                     R[k:k+nev, k:k+nev] = alpha
 
                 # Store the converged eigenvalues
@@ -176,6 +184,9 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
                 # Remove the eigenvalue from the search space
                 V[:, 0:m-nev] = V[:, 0:m] @ U[:, nev:m]
                 AV[:, 0:m-nev] = AV[:, 0:m] @ U[:, nev:m]
+
+                if M is not None:
+                    MV[:, 0:m-nev] = MV[:, 0:m] @ U[:, nev:m]
 
                 VAV[0:m-nev, 0:m-nev] = S[nev:m, nev:m]
 
@@ -198,6 +209,9 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
 
             V[:, 0:new_m] = V[:, 0:m] @ U[:, 0:new_m]
             AV[:, 0:new_m] = AV[:, 0:m] @ U[:, 0:new_m]
+
+            if M is not None:
+                MV[:, 0:new_m] = MV[:, 0:m] @ U[:, 0:new_m]
 
             VAV[0:new_m, 0:new_m] = S[0:new_m, 0:new_m]
 

@@ -85,6 +85,25 @@ def test_jdqr_largest_magnitude(dtype):
     assert_allclose(jdqr_eigs.real, eigs.real, rtol=0, atol=atol)
     assert_allclose(abs(jdqr_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
 
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_jdqr_largest_magnitude_with_mass(dtype):
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 1e3
+    atol = tol * 10
+    n = 20
+    k = 5
+    a = generate_test_matrix([n, n], dtype)
+    m = generate_mass_matrix([n, n], dtype)
+
+    alpha = jdqr.jdqr(a, k, Target.LargestMagnitude, tol=tol, M=m)
+    jdqr_eigs = numpy.array(sorted(alpha, key=lambda x: -abs(x)))
+
+    eigs = scipy.linalg.eigvals(a, m)
+    eigs = numpy.array(sorted(eigs, key=lambda x: -abs(x)))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqr_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqr_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_smallest_real(dtype):
@@ -280,6 +299,31 @@ def test_jdqr_prec(dtype):
     assert_allclose(abs(jdqr_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
 
 @pytest.mark.parametrize('dtype', DTYPES)
+def test_jdqr_prec_with_mass(dtype):
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 1e3
+    atol = tol * 10
+    n = 20
+    k = 5
+    a = generate_test_matrix([n, n], dtype)
+    m = generate_mass_matrix([n, n], dtype)
+
+    inv = scipy.sparse.linalg.spilu(scipy.sparse.csc_matrix(a))
+
+    def _prec(x, *args):
+        return inv.solve(x)
+
+    alpha = jdqr.jdqr(a, num=k, tol=tol, prec=_prec, M=m)
+    jdqr_eigs = numpy.array(sorted(alpha, key=lambda x: abs(x)))
+
+    eigs = scipy.linalg.eigvals(a, m)
+    eigs = numpy.array(sorted(eigs, key=lambda x: abs(x)))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqr_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqr_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+@pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_largest_magnitude_lowdim(dtype):
     numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
@@ -292,6 +336,26 @@ def test_jdqr_largest_magnitude_lowdim(dtype):
     jdqr_eigs = numpy.array(sorted(alpha, key=lambda x: -abs(x)))
 
     eigs = scipy.linalg.eigvals(a)
+    eigs = numpy.array(sorted(eigs, key=lambda x: -abs(x)))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqr_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqr_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_jdqr_largest_magnitude_lowdim_with_mass(dtype):
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 1e3
+    atol = tol * 10
+    n = 20
+    k = 2
+    a = generate_test_matrix([n, n], dtype)
+    m = generate_mass_matrix([n, n], dtype)
+
+    alpha = jdqr.jdqr(a, k, Target.LargestMagnitude, tol=tol, subspace_dimensions=[10, 18], M=m)
+    jdqr_eigs = numpy.array(sorted(alpha, key=lambda x: -abs(x)))
+
+    eigs = scipy.linalg.eigvals(a, m)
     eigs = numpy.array(sorted(eigs, key=lambda x: -abs(x)))
     eigs = eigs[:k]
 
@@ -327,6 +391,38 @@ def test_jdqr_smallest_magnitude_eigenvectors(dtype):
             i += 2
         else:
             assert norm(a @ v[:, i] - alpha[i] * v[:, i]) < atol
+            i += 1
+
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_jdqr_smallest_magnitude_eigenvectors_with_mass(dtype):
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 1e3
+    atol = tol * 10
+    n = 20
+    k = 5
+    a = generate_test_matrix([n, n], dtype)
+    m = generate_mass_matrix([n, n], dtype)
+
+    alpha, v = jdqr.jdqr(a, num=k, tol=tol, M=m, return_eigenvectors=True)
+    jdqr_eigs = numpy.array(sorted(alpha, key=lambda x: abs(x)))
+    jdqr_eigs = jdqr_eigs[:k]
+
+    eigs = scipy.linalg.eigvals(a, m)
+    eigs = numpy.array(sorted(eigs, key=lambda x: abs(x)))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqr_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqr_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+    i = 0
+    while i < k:
+        ctype = numpy.dtype(numpy.dtype(dtype).char.upper())
+        if dtype != ctype and alpha[i].imag:
+            assert norm(a @ v[:, i] - alpha[i].real * m @ v[:, i] + alpha[i].imag * m @ v[:, i+1]) < atol
+            assert norm(a @ v[:, i+1] - alpha[i].imag * m @ v[:, i] - alpha[i].real * m @ v[:, i+1]) < atol
+            i += 2
+        else:
+            assert norm(a @ v[:, i] - alpha[i] * m @ v[:, i]) < atol
             i += 1
 
 def generate_Epetra_test_matrix(map, shape, dtype):
