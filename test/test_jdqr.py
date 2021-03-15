@@ -425,6 +425,28 @@ def test_jdqr_smallest_magnitude_eigenvectors_with_mass(dtype):
             assert norm(a @ v[:, i] - alpha[i] * m @ v[:, i]) < atol
             i += 1
 
+@pytest.mark.parametrize('dtype', DTYPES)
+def test_jdqr_smallest_magnitude_initial_subspace(dtype):
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 1e3
+    atol = tol * 10
+    n = 20
+    k = 5
+    a = generate_test_matrix([n, n], dtype)
+
+    alpha, q = jdqr.jdqr(a, num=k, tol=tol, return_subspace=True)
+
+    alpha = jdqr.jdqr(a, num=k, tol=tol, initial_subspace=q)
+    jdqr_eigs = numpy.array(sorted(alpha, key=lambda x: abs(x)))
+    jdqr_eigs = jdqr_eigs[:k]
+
+    eigs = scipy.linalg.eigvals(a)
+    eigs = numpy.array(sorted(eigs, key=lambda x: abs(x)))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqr_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqr_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
 def generate_Epetra_test_matrix(map, shape, dtype):
     try:
         from PyTrilinos import Epetra

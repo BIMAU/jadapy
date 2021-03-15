@@ -91,14 +91,14 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
     # Generalized Schur vectors
     Q = interface.vector(num + extra)
     Z = interface.vector(num + extra)
+    # Preconditioned Z
+    Y = interface.vector(num + extra)
     QZ = numpy.zeros((num + extra, num + extra), dtype)
 
     # Orthonormal search subspace
     V = interface.vector(subspace_dimensions[1])
     # Orthonormal test subspace
     W = interface.vector(subspace_dimensions[1])
-    # Preconditioned orthonormal search subspace
-    Y = interface.vector(subspace_dimensions[1])
     # AV = A*V without orthogonalization
     AV = interface.vector(subspace_dimensions[1])
     # BV = B*V without orthogonalization

@@ -4,7 +4,7 @@ import scipy
 
 from jadapy import Target
 from jadapy.schur import schur, schur_sort
-from jadapy.orthogonalization import orthogonalize, orthonormalize
+from jadapy.orthogonalization import normalize, orthogonalize, orthonormalize
 from jadapy.correction_equation import solve_correction_equation, solve_generalized_correction_equation
 from jadapy.utils import dot, norm
 from jadapy.NumPyInterface import NumPyInterface
@@ -13,8 +13,9 @@ def _prec(x, *args):
     return x
 
 def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
-         maxit=1000, subspace_dimensions=(20, 40), arithmetic='real',
-         return_eigenvectors=False, interface=None):
+         maxit=1000, subspace_dimensions=(20, 40), initial_subspace=None, arithmetic='real',
+         return_eigenvectors=False, return_subspace=False,
+         interface=None):
 
     if arithmetic not in ['real', 'complex', 'r', 'c']:
         raise ValueError("argument must be 'real', or 'complex'")
@@ -58,6 +59,8 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
 
     # Schur vectors
     Q = interface.vector(num + extra)
+    # Preconditioned Q
+    Y = interface.vector(num + extra)
     H = numpy.zeros((num + extra, num + extra), dtype)
 
     MQ = Q
@@ -66,8 +69,6 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
 
     # Orthonormal search subspace
     V = interface.vector(subspace_dimensions[1])
-    # Preconditioned orthonormal search subspace
-    Y = interface.vector(subspace_dimensions[1])
     # AV = A*V without orthogonalization
     AV = interface.vector(subspace_dimensions[1])
 
@@ -84,7 +85,12 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
 
     while k < num and it <= maxit:
         if it == 1:
-            V[:, 0] = interface.random()
+            if initial_subspace is not None:
+                nev = initial_subspace.shape[1]
+                V[:, 0:nev] = initial_subspace
+            else:
+                V[:, 0] = interface.random()
+                normalize(V[:, 0], M=M)
         else:
             solver_maxit = 100
             sigma = evs[0]
@@ -106,7 +112,7 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
                     A, prec, Q[:, 0:k+nev], Y[:, 0:k+nev], H[0:k+nev, 0:k+nev],
                     sigma, r[:, 0:nev], solver_tolerance, solver_maxit, interface)
 
-        orthonormalize(V[:, 0:m], V[:, m:m+nev], M=M, MV=None if MV is None else MV[:, 0:m])
+            orthonormalize(V[:, 0:m], V[:, m:m+nev], M=M, MV=None if MV is None else MV[:, 0:m])
 
         AV[:, m:m+nev] = A @ V[:, m:m+nev]
         if M is not None:
@@ -226,6 +232,8 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
         evs, v = scipy.linalg.eig(R[0:k, 0:k], left=False, right=True)
 
         if ctype == dtype:
+            if return_subspace:
+                return evs, Q[:, 0:k] @ v, Q[:, 0:k]
             return evs, Q[:, 0:k] @ v
 
         i = 0
@@ -235,6 +243,11 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
                 Y[:, i+1] = Q[:, 0:k] @ v[:, i].imag
                 i += 1
             i += 1
-        return evs, Y
+        if return_subspace:
+            return evs, Y[:, 0:k], Q[:, 0:k]
+        return evs, Y[:, 0:k]
+
+    if return_subspace:
+        return aconv[0:num], Q[:, 0:k]
 
     return aconv[0:num]
