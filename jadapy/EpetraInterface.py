@@ -11,6 +11,10 @@ class Vector(Epetra.MultiVector):
 
         self.shape = [self.shape[1], self.shape[0]]
 
+        if len(args) > 0 and args[0] is Epetra.View:
+            # Keep a reference to the parent so we can return a view.
+            self.parent = args[1]
+
     def __getitem__(self, key):
         if isinstance(key, tuple) and key[0] == slice(None, None, None):
             if isinstance(key[1], slice):
