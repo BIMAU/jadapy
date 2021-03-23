@@ -67,8 +67,10 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
     evs = None
 
     dtype = A.dtype
-    ctype = numpy.dtype(dtype.char.upper())
+    if interface:
+        dtype = interface.dtype
 
+    ctype = numpy.dtype(dtype.char.upper())
     if arithmetic in ['complex', 'c']:
         dtype = ctype
 

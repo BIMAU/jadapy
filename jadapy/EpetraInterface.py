@@ -143,6 +143,7 @@ class EpetraInterface:
 
     def __init__(self, map):
         self.map = map
+        self.dtype = numpy.dtype('d')
 
     def vector(self, k=None):
         if k:
