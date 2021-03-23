@@ -501,3 +501,117 @@ def test_Epetra_eigenvectors():
         else:
             assert norm(a2 @ v[:, i] * beta[i].real - b2 @ v[:, i] * alpha[i].real) < atol
             i += 1
+
+def generate_Complex_Epetra_test_matrix(map, shape, dtype):
+    try:
+        from PyTrilinos import Epetra
+        from jadapy import ComplexEpetraInterface
+    except ImportError:
+        pytest.skip("Trilinos not found")
+
+    a1 = generate_test_matrix(shape, dtype)
+    a2 = ComplexEpetraInterface.CrsMatrix(Epetra.Copy, map, shape[1])
+
+    for i in range(shape[0]):
+        for j in range(shape[1]):
+            a2[i, j] = a1[i, j]
+    a2.FillComplete()
+
+    return a1, a2
+
+def test_Complex_Epetra():
+    try:
+        from PyTrilinos import Epetra
+        from jadapy import ComplexEpetraInterface
+    except ImportError:
+        pytest.skip("Trilinos not found")
+
+    dtype = numpy.float64
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 1e3
+    atol = tol * 10
+    n = 20
+    k = 5
+
+    comm = Epetra.PyComm()
+    map = Epetra.Map(n, 0, comm)
+    a1, a2 = generate_Complex_Epetra_test_matrix(map, [n, n], dtype)
+    b1, b2 = generate_Complex_Epetra_test_matrix(map, [n, n], dtype)
+
+    interface = ComplexEpetraInterface.ComplexEpetraInterface(map)
+
+    alpha, beta = jdqz.jdqz(a2, b2, k, tol=tol, interface=interface)
+    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: abs(x)))
+
+    eigs = scipy.linalg.eigvals(a1, b1)
+    eigs = numpy.array(sorted(eigs, key=lambda x: abs(x)))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+def test_Complex_Epetra_lowdim():
+    try:
+        from PyTrilinos import Epetra
+        from jadapy import ComplexEpetraInterface
+    except ImportError:
+        pytest.skip("Trilinos not found")
+
+    dtype = numpy.float64
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 1e3
+    atol = tol * 10
+    n = 20
+    k = 2
+
+    comm = Epetra.PyComm()
+    map = Epetra.Map(n, 0, comm)
+    a1, a2 = generate_Complex_Epetra_test_matrix(map, [n, n], dtype)
+    b1, b2 = generate_Complex_Epetra_test_matrix(map, [n, n], dtype)
+
+    interface = ComplexEpetraInterface.ComplexEpetraInterface(map)
+
+    alpha, beta = jdqz.jdqz(a2, b2, k, Target.LargestMagnitude, tol=tol, subspace_dimensions=[10, 18], interface=interface)
+    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: -abs(x)))
+
+    eigs = scipy.linalg.eigvals(a1, b1)
+    eigs = numpy.array(sorted(eigs, key=lambda x: -abs(x)))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+def test_Complex_Epetra_eigenvectors():
+    try:
+        from PyTrilinos import Epetra
+        from jadapy import ComplexEpetraInterface
+    except ImportError:
+        pytest.skip("Trilinos not found")
+
+    dtype = numpy.float64
+    numpy.random.seed(1234)
+    tol = numpy.finfo(dtype).eps * 1e3
+    atol = tol * 10
+    n = 20
+    k = 5
+
+    comm = Epetra.PyComm()
+    map = Epetra.Map(n, 0, comm)
+    a1, a2 = generate_Complex_Epetra_test_matrix(map, [n, n], dtype)
+    b1, b2 = generate_Complex_Epetra_test_matrix(map, [n, n], dtype)
+
+    interface = ComplexEpetraInterface.ComplexEpetraInterface(map)
+
+    alpha, beta, v = jdqz.jdqz(a2, b2, num=k, tol=tol, return_eigenvectors=True, interface=interface)
+    jdqz_eigs = numpy.array(sorted(alpha / beta, key=lambda x: abs(x)))
+    jdqz_eigs = jdqz_eigs[:k]
+
+    eigs = scipy.linalg.eigvals(a1, b1)
+    eigs = numpy.array(sorted(eigs, key=lambda x: abs(x)))
+    eigs = eigs[:k]
+
+    assert_allclose(jdqz_eigs.real, eigs.real, rtol=0, atol=atol)
+    assert_allclose(abs(jdqz_eigs.imag), abs(eigs.imag), rtol=0, atol=atol)
+
+    for i in range(k):
+        assert norm(a2 @ v[:, i] * beta[i] - b2 @ v[:, i] * alpha[i]) < atol
