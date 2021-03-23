@@ -90,6 +90,9 @@ def _is_target(target, target_type):
         return False
 
 def _get_ev(a, b, i):
+    if b[i, i] == 0.0:
+        return numpy.inf
+
     if numpy.iscomplexobj(a):
         return a[i, i] / b[i, i]
 
