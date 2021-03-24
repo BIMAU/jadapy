@@ -1,8 +1,6 @@
 import numpy
-import warnings
 
 from PyTrilinos import Epetra
-from PyTrilinos import AztecOO
 
 from jadapy import EpetraInterface
 

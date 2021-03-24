@@ -16,7 +16,7 @@ class NumPyInterface:
 
     def __init__(self, n, dtype=None):
         self.n = n
-        self.dtype = dtype
+        self.dtype = numpy.dtype(dtype)
 
     def vector(self, k=None):
         if k:
