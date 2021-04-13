@@ -7,6 +7,14 @@ from numpy.testing import assert_allclose
 from jadapy import schur
 from jadapy import Target
 
+try:
+    n = 20
+    a = numpy.random.rand(n, n)
+    t, q = schur.schur(a)
+    schur.schur_sort(t, q, Target.LargestMagnitude)
+except ValueError:
+    pytest.skip('SciPy too old', allow_module_level=True)
+
 REAL_DTYPES = [numpy.float32, numpy.float64]
 COMPLEX_DTYPES = [numpy.complex64, numpy.complex128]
 DTYPES = REAL_DTYPES + COMPLEX_DTYPES
