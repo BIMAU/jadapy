@@ -132,9 +132,8 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
             if m < subspace_dimensions[0]:
                 solver_tolerance = 0.5
                 solver_maxit = 1
-                if target != 0.0:
-                    sigma_a = target
-                    sigma_b = 1.0
+                sigma_a = target
+                sigma_b = 1.0
 
             V[:, m:m+nev] = solve_generalized_correction_equation(
                 A, B, prec, Q[:, 0:k+nev], Z[:, 0:k+nev], Y[:, 0:k+nev], QZ[0:k+nev, 0:k+nev],
