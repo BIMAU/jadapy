@@ -88,8 +88,8 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
     while k < num and it <= maxit:
         if it == 1:
             if initial_subspace is not None:
-                nev = initial_subspace.shape[1]
-                V[:, 0:nev] = initial_subspace
+                nev = min(initial_subspace.shape[1], subspace_dimensions[1])
+                V[:, 0:nev] = initial_subspace[:, 0:nev]
             else:
                 V[:, 0] = interface.random()
                 normalize(V[:, 0], M=M)
