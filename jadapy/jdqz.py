@@ -202,7 +202,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
             sys.stdout.flush()
 
             # Store converged Petrov pairs
-            if rnorm <= tol:
+            if rnorm <= tol and m > nev:
                 # Compute RA and RB so we can compute the eigenvectors
                 if return_eigenvectors:
                     if k > 0:

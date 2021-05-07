@@ -166,7 +166,7 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
             sys.stdout.flush()
 
             # Store converged Ritz pairs
-            if rnorm <= tol:
+            if rnorm <= tol and m > nev:
                 # Compute R so we can compute the eigenvectors
                 if return_eigenvectors:
                     if k > 0:
