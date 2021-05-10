@@ -118,7 +118,8 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
             if initial_subspaces is not None:
                 nev = min(initial_subspaces[0].shape[1], subspace_dimensions[1])
                 V[:, 0:nev] = initial_subspaces[0][:, 0:nev]
-                W[:, 0:nev] = initial_subspaces[1][:, 0:nev]
+                if len(initial_subspaces) > 1:
+                    W[:, 0:nev] = initial_subspaces[1][:, 0:nev]
             else:
                 V[:, 0] = interface.random()
                 normalize(V[:, 0])
@@ -144,7 +145,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
         AV[:, m:m+nev] = A @ V[:, m:m+nev]
         BV[:, m:m+nev] = B @ V[:, m:m+nev]
 
-        if it > 1 or initial_subspaces is None:
+        if it > 1 or initial_subspaces is None or len(initial_subspaces) < 2:
             nu, mu = _set_testspace(testspace, target, alpha, beta, dtype, ctype)
             W[:, m:m+nev] = AV[:, m:m+nev] @ nu[0:nev, 0:nev] + BV[:, m:m+nev] @ mu[0:nev, 0:nev]
 
