@@ -147,6 +147,12 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
 
         if it > 1 or initial_subspaces is None or len(initial_subspaces) < 2:
             nu, mu = _set_testspace(testspace, target, alpha, beta, dtype, ctype)
+
+            if nu.shape[0] < nev:
+                # Repeat nu and mu in case only an initial V was passed
+                nu = numpy.diag(numpy.repeat(nu[0, 0], nev))
+                mu = numpy.diag(numpy.repeat(mu[0, 0], nev))
+
             W[:, m:m+nev] = AV[:, m:m+nev] @ nu[0:nev, 0:nev] + BV[:, m:m+nev] @ mu[0:nev, 0:nev]
 
             orthogonalize(Z[:, 0:k], W[:, m:m+nev])
