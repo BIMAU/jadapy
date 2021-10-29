@@ -169,7 +169,7 @@ class Operator(Epetra.Operator):
         return y.Update(1.0, x, 0.0)
 
     def Comm(self):
-        return self.op.Q.Comm()
+        return self.op.A.Comm()
 
     def OperatorDomainMap(self):
         return self.op.A.OperatorDomainMap()
