@@ -206,7 +206,7 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
             else:
                 found = False
 
-        solver_tolerance = max(solver_tolerance / 2, tol)
+        solver_tolerance = max(solver_tolerance / 2, tol / 100)
 
         if m >= min(subspace_dimensions[1], n - k) and k < num:
             # Maximum search space dimension has been reached.
