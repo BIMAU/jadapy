@@ -1,8 +1,8 @@
-from numpy import complex128
+from numpy import float64
 
-class Target(complex128):
+class Target(float64):
     def __new__(cls, *args, **kwargs):
-        return complex128.__new__(cls, *args, **kwargs)
+        return float64.__new__(cls, *args, **kwargs)
 
 
 SmallestMagnitude = Target(0.0)
