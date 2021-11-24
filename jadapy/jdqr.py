@@ -12,7 +12,7 @@ from jadapy.NumPyInterface import NumPyInterface
 def _prec(x, *args):
     return x
 
-def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
+def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, lock_tol=None, M=None, prec=None,
          maxit=1000, subspace_dimensions=(20, 40), initial_subspace=None, arithmetic='real',
          return_eigenvectors=False, return_subspace=False,
          interface=None):
@@ -22,6 +22,9 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
 
     if not prec:
         prec = _prec
+
+    if not lock_tol:
+        lock_tol = tol * 1e2
 
     solver_tolerance = 1.0
 
@@ -36,6 +39,7 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
 
     alpha = None
     evs = None
+    sort_target = target
 
     dtype = A.dtype
     if interface:
@@ -132,7 +136,7 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
 
         found = True
         while found:
-            [S, U] = schur_sort(S, U, target)
+            [S, U] = schur_sort(S, U, sort_target)
 
             nev = 1
             if dtype != ctype and S.shape[0] > 1 and abs(S[1, 0]) > 0.0:
@@ -165,6 +169,9 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
                   (it, m, ev_est.real, ev_est.imag, rnorm))
             sys.stdout.flush()
 
+            if rnorm <= lock_tol:
+                sort_target = ev_est
+
             # Store converged Ritz pairs
             if rnorm <= tol and m > nev:
                 # Compute R so we can compute the eigenvectors
@@ -188,6 +195,9 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, M=None, prec=None,
 
                 # Reset the iterative solver tolerance
                 solver_tolerance = 1.0
+
+                # Unlock the target
+                sort_target = target
 
                 # Remove the eigenvalue from the search space
                 V[:, 0:m-nev] = V[:, 0:m] @ U[:, nev:m]
