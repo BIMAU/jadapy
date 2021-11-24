@@ -78,7 +78,7 @@ def normalize(w, nrm=None, M=None, verbose=True):
     w /= nrm
     return nrm
 
-def orthogonalize(V, w, W=None, M=None, MV=None, MW=None, method='DGKS'):
+def orthogonalize(V, w, W=None, M=None, MV=None, MW=None, method='Repeated MGS'):
     if M is not None and V is not None and MV is None:
         MV = M @ V
 
@@ -93,9 +93,13 @@ def orthogonalize(V, w, W=None, M=None, MV=None, MW=None, method='DGKS'):
 
     if method == 'Modified Gram-Schmidt' or method == 'MGS':
         return modified_gs(V, w, W, M, MV, MW)
+
+    if method == 'Repeated Modified Gram-Schmidt' or method == 'Repeated MGS':
+        return repeated_mgs(V, w, W, M, MV, MW)
+
     return DGKS(V, w, W, M, MV, MW)
 
-def orthonormalize(V, w=None, W=None, M=None, MV=None, MW=None, method='DGKS'):
+def orthonormalize(V, w=None, W=None, M=None, MV=None, MW=None, method='Repeated MGS'):
     if w is None:
         w = V
         V = None

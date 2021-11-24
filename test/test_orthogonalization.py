@@ -10,7 +10,7 @@ from jadapy.utils import norm
 REAL_DTYPES = [numpy.float32, numpy.float64]
 COMPLEX_DTYPES = [numpy.complex64, numpy.complex128]
 DTYPES = REAL_DTYPES + COMPLEX_DTYPES
-OTYPES = ['DGKS', 'MGS']
+OTYPES = ['DGKS', 'MGS', 'Repeated MGS']
 
 def generate_random_dtype_array(shape, dtype):
     if dtype in COMPLEX_DTYPES:
