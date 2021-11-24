@@ -54,6 +54,19 @@ def modified_gs(V, w, W=None, M=None, MV=None, MW=None):
 
     return None
 
+def repeated_mgs(V, w, W=None, M=None, MV=None, MW=None):
+    prev_nrm = norm(w, M)
+    modified_gs(V, w, W, M, MV, MW)
+    nrm = norm(w, M)
+
+    eta = 1 / sqrt(2)
+    while nrm < eta * prev_nrm:
+        modified_gs(V, w, W, M, MV, MW)
+        prev_nrm = nrm
+        nrm = norm(w, M)
+
+    return nrm
+
 def normalize(w, nrm=None, M=None, verbose=True):
     if nrm is None:
         nrm = norm(w, M)
