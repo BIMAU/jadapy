@@ -1,3 +1,5 @@
+import warnings
+
 from math import sqrt
 
 from jadapy.utils import dot, norm, eps
@@ -67,13 +69,23 @@ def repeated_mgs(V, w, W=None, M=None, MV=None, MW=None):
 
     return nrm
 
-def normalize(w, nrm=None, M=None, verbose=True):
+def normalize(w, nrm=None, M=None, verbose=True, interface=None):
     if nrm is None:
         nrm = norm(w, M)
 
     if verbose and nrm < eps(w):
-        # print('Warning: norm during normalization is nearly zero: %e' % nrm)
-        raise Exception('Norm during normalization is nearly zero: %e' % nrm)
+        if not interface:
+            raise Exception('Norm during normalization is nearly zero: %e' % nrm)
+        else:
+            warnings.warn('Warning: norm during normalization is nearly zero: %e. Taking a random vector.' % nrm)
+
+            if len(w.shape) > 1:
+                w[:, 0] = interface.random()
+            else:
+                w[:] = interface.random()
+
+            w /= norm(w, M)
+            return w
 
     w /= nrm
     return nrm
@@ -99,7 +111,7 @@ def orthogonalize(V, w, W=None, M=None, MV=None, MW=None, method='Repeated MGS')
 
     return DGKS(V, w, W, M, MV, MW)
 
-def orthonormalize(V, w=None, W=None, M=None, MV=None, MW=None, method='Repeated MGS'):
+def orthonormalize(V, w=None, W=None, M=None, MV=None, MW=None, method='Repeated MGS', interface=None):
     if w is None:
         w = V
         V = None
@@ -118,4 +130,4 @@ def orthonormalize(V, w=None, W=None, M=None, MV=None, MW=None, method='Repeated
         return
 
     nrm = orthogonalize(V, w, W, M, MV, MW, method)
-    normalize(w, nrm, M)
+    normalize(w, nrm, M, interface=interface)

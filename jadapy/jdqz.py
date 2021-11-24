@@ -140,7 +140,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
                 A, B, prec, Q[:, 0:k+nev], Z[:, 0:k+nev], Y[:, 0:k+nev], QZ[0:k+nev, 0:k+nev],
                 sigma_a, sigma_b, r[:, 0:nev], solver_tolerance, solver_maxit, interface)
 
-            orthonormalize(V[:, 0:m], V[:, m:m+nev])
+            orthonormalize(V[:, 0:m], V[:, m:m+nev], interface=interface)
 
         AV[:, m:m+nev] = A @ V[:, m:m+nev]
         BV[:, m:m+nev] = B @ V[:, m:m+nev]
@@ -156,7 +156,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
             W[:, m:m+nev] = AV[:, m:m+nev] @ nu[0:nev, 0:nev] + BV[:, m:m+nev] @ mu[0:nev, 0:nev]
 
             orthogonalize(Z[:, 0:k], W[:, m:m+nev])
-            orthonormalize(W[:, 0:m], W[:, m:m+nev])
+            orthonormalize(W[:, 0:m], W[:, m:m+nev], interface=interface)
 
         # Update WAV = W' * A * V
         for i in range(m):
