@@ -14,17 +14,18 @@ def _proj(x, y, z=None):
     except ValueError:
         y -= x * z.conj().dot(y)
 
-def DGKS(V, w, W=None, M=None, MV=None, MW=None):
-    prev_nrm = norm(w, M)
+def gram_schmidt(V, w, W=None, M=None, MV=None, MW=None):
     _proj(V, w, MV)
     _proj(W, w, MW)
 
+def DGKS(V, w, W=None, M=None, MV=None, MW=None):
+    prev_nrm = norm(w, M)
+    gram_schmidt(V, w, W, M, MV, MW)
     nrm = norm(w, M)
 
     eta = 1 / sqrt(2)
     while nrm < eta * prev_nrm:
-        _proj(V, w, MV)
-        _proj(W, w, MW)
+        gram_schmidt(V, w, W, M, MV, MW)
         prev_nrm = nrm
         nrm = norm(w, M)
 
