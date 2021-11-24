@@ -39,7 +39,7 @@ def _set_testspace(testspace, target, alpha, beta, dtype, ctype):
 
     return nu, mu
 
-def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
+def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, lock_tol=None, prec=None,
          maxit=1000, subspace_dimensions=(20, 40), initial_subspaces=None,
          arithmetic='real', testspace='Harmonic Petrov',
          return_eigenvectors=False, return_subspaces=False,
@@ -50,6 +50,9 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
 
     if not prec:
         prec = _prec
+
+    if not lock_tol:
+        lock_tol = tol * 1e2
 
     solver_tolerance = 1.0
 
@@ -65,6 +68,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
     alpha = None
     beta = None
     evs = None
+    sort_target = target
 
     dtype = A.dtype
     if interface:
@@ -176,7 +180,7 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
 
         found = True
         while found:
-            [S, T, UL, UR] = generalized_schur_sort(S, T, UL, UR, target)
+            [S, T, UL, UR] = generalized_schur_sort(S, T, UL, UR, sort_target)
 
             nev = 1
             if dtype != ctype and S.shape[0] > 1 and abs(S[1, 0]) > 0.0:
@@ -208,6 +212,9 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
                   (it, m, ev_est.real, ev_est.imag, rnorm))
             sys.stdout.flush()
 
+            if rnorm <= lock_tol:
+                sort_target = ev_est
+
             # Store converged Petrov pairs
             if rnorm <= tol and m > nev:
                 # Compute RA and RB so we can compute the eigenvectors
@@ -236,6 +243,9 @@ def jdqz(A, B, num=5, target=Target.SmallestMagnitude, tol=1e-8, prec=None,
 
                 # Reset the iterative solver tolerance
                 solver_tolerance = 1.0
+
+                # Unlock the target
+                sort_target = target
 
                 # Remove the eigenvalue from the search space
                 V[:, 0:m-nev] = V[:, 0:m] @ UR[:, nev:m]
