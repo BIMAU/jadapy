@@ -47,6 +47,9 @@ class Vector(Epetra.MultiVector):
             return tmp.array.copy().flatten()
         return tmp.array.copy().T
 
+    def random(self):
+        self.array[:] = numpy.random.random((len(self), 1))
+
     def conj(self):
         return self
 
@@ -153,7 +156,7 @@ class EpetraInterface:
 
     def random(self):
         tmp = self.vector()
-        tmp.Random()
+        tmp.random()
         return tmp
 
     def solve(self, op, rhs, tol, maxit):

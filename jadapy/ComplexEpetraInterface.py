@@ -53,9 +53,9 @@ class ComplexVector:
             return tmp_real.array.copy().flatten() + tmp_imag.array.copy().flatten() * 1j
         return tmp_real.array.copy().T + tmp_imag.array.copy().T * 1j
 
-    def Random(self):
-        self.real.Random()
-        self.imag.Random()
+    def random(self):
+        self.real.random()
+        self.imag.random()
 
     def Comm(self):
         return self.real.Comm()
@@ -200,7 +200,7 @@ class ComplexEpetraInterface:
 
     def random(self):
         tmp = self.vector()
-        tmp.Random()
+        tmp.random()
         return tmp
 
     def solve(self, op, rhs, tol, maxit):
