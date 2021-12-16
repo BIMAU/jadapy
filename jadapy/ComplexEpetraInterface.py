@@ -57,6 +57,9 @@ class ComplexVector:
         self.real.random()
         self.imag.random()
 
+    def copy(self):
+        return ComplexVector(self)
+
     def Comm(self):
         return self.real.Comm()
 
