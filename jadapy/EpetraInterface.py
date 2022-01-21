@@ -50,6 +50,9 @@ class Vector(Epetra.MultiVector):
     def random(self):
         self.array[:] = numpy.random.random((len(self), 1))
 
+    def copy(self):
+        return Vector(self)
+
     def conj(self):
         return self
 
