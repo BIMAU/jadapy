@@ -133,6 +133,12 @@ class ComplexVector:
         self *= 1.0 / x
         return self
 
+    def Multiply(self, scalar_ab, a, b, scalar_self):
+        ret = 0
+        ret += self.real.Multiply(scalar_ab, a, b.real, scalar_self)
+        ret += self.imag.Multiply(scalar_ab, a, b.imag, scalar_self)
+        return ret
+
 class CrsMatrix(Epetra.CrsMatrix):
 
     def __init__(self, *args, **kwargs):
