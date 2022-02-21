@@ -1,13 +1,24 @@
 import numpy
 import scipy
 
-from scipy.linalg.misc import _datacopied
-
 from jadapy import Target
 
 _double_precision = ['i', 'l', 'd']
 
 __all__ = ['generalized_schur', 'generalized_schur_sort']
+
+
+def _datacopied(arr, original):
+    """
+    Strict check for `arr` not sharing any data with `original`,
+    under the assumption that arr = asarray(original)
+    """
+    if arr is original:
+        return False
+    if not isinstance(original, numpy.ndarray) and hasattr(original, '__array__'):
+        return False
+    return arr.base is None
+
 
 def generalized_schur(a, b, output='real', lwork=None, overwrite_a=False, overwrite_b=False, sort=None,
                       check_finite=True):
