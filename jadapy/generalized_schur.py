@@ -149,12 +149,15 @@ def generalized_schur_sort(a, b, q, z, target):
                 continue
 
             result = tgexc(a, b, q, z, idx, i)
-            assert result[-1] == 0
+            assert result[-1] >= 0
 
             a = result[0]
             b = result[1]
             q = result[2]
             z = result[3]
+
+            if result[-1] != 0:
+                break
 
         return a, b, q, z
     except ValueError:

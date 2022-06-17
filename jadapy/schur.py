@@ -60,10 +60,13 @@ def schur_sort(a, q, target):
                 continue
 
             result = trexc(a, q, idx, i)
-            assert result[-1] == 0
+            assert result[-1] >= 0
 
             a = result[0]
             q = result[1]
+
+            if result[-1] != 0:
+                break
 
         return a, q
     except ValueError:
