@@ -1,3 +1,4 @@
+from packaging import version
 import numpy
 import scipy
 
@@ -148,7 +149,10 @@ def generalized_schur_sort(a, b, q, z, target):
             if idx == i:
                 continue
 
-            result = tgexc(a, b, q, z, idx, i)
+            if version.parse(scipy.version.short_version) < version.parse('1.10.0'):
+                result = tgexc(a, b, q, z, idx, i)
+            else:
+                result = tgexc(a, b, q, z, idx + 1, i + 1)
             assert result[-1] >= 0
 
             a = result[0]

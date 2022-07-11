@@ -59,7 +59,7 @@ def schur_sort(a, q, target):
             if idx == i:
                 continue
 
-            result = trexc(a, q, idx, i)
+            result = trexc(a, q, idx + 1, i + 1)
             assert result[-1] >= 0
 
             a = result[0]

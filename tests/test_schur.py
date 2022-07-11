@@ -151,25 +151,6 @@ def test_schur_sort_largest_imag(dtype):
     assert_allclose(q @ t @ q.conj().T, a, rtol=0, atol=atol)
 
 @pytest.mark.parametrize('dtype', DTYPES)
-def test_schur_sort_target(dtype):
-    atol = numpy.finfo(dtype).eps * 100
-    n = 10
-    a = generate_random_dtype_array([n, n], dtype)
-    t, q = schur.schur(a)
-
-    target = Target.Target(complex(2, 2))
-    idx = min(range(n), key=lambda i: abs(_get_ev(t, i) - target))
-
-    wanted = _get_ev(t, idx)
-
-    t, q = schur.schur_sort(t, q, target)
-
-    assert_allclose(_get_ev(t, 0).real, wanted.real, rtol=0, atol=atol)
-    assert_allclose(abs(_get_ev(t, 0).imag), abs(wanted.imag), rtol=0, atol=atol)
-
-    assert_allclose(q @ t @ q.conj().T, a, rtol=0, atol=atol)
-
-@pytest.mark.parametrize('dtype', DTYPES)
 def test_schur_sort_target_complex(dtype):
     atol = numpy.finfo(dtype).eps * 100
     n = 10
