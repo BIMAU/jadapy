@@ -2,7 +2,6 @@ import numpy
 import scipy
 
 from scipy.linalg import schur
-from scipy.linalg.lapack import _compute_lwork
 
 from jadapy import Target
 
@@ -45,39 +44,26 @@ def _select(start, end, a, target):
     return idx
 
 def schur_sort(a, q, target):
+    trexc, = scipy.linalg.get_lapack_funcs(('trexc',), (a,))
+
     n = a.shape[0]
+    for i in range(n):
+        if i > 0 and a[i, i - 1] != 0:
+            # Complex conjugate eigenpair
+            continue
 
-    try:
-        trexc, = scipy.linalg.get_lapack_funcs(('trexc',), (a,))
-        for i in range(n):
-            if i > 0 and a[i, i - 1] != 0:
-                # Complex conjugate eigenpair
-                continue
+        idx = _select(i, n, a, target)
 
-            idx = _select(i, n, a, target)
+        if idx == i:
+            continue
 
-            if idx == i:
-                continue
+        result = trexc(a, q, idx + 1, i + 1)
+        assert result[-1] >= 0
 
-            result = trexc(a, q, idx + 1, i + 1)
-            assert result[-1] >= 0
+        a = result[0]
+        q = result[1]
 
-            a = result[0]
-            q = result[1]
+        if result[-1] != 0:
+            break
 
-            if result[-1] != 0:
-                break
-
-        return a, q
-    except ValueError:
-        trsen, trsen_lwork = scipy.linalg.get_lapack_funcs(('trsen', 'trsen_lwork',), (a,))
-        idx = _select(0, n, a, target)
-
-        select = numpy.zeros(n)
-        select[idx] = 1
-
-        lwork = _compute_lwork(trsen_lwork, select, a)
-        result = trsen(select, a, q, lwork=lwork)
-        assert result[-1] == 0
-
-        return result[0], result[1]
+    return a, q

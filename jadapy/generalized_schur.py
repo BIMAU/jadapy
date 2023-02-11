@@ -1,4 +1,3 @@
-from packaging import version
 import numpy
 import scipy
 
@@ -135,47 +134,28 @@ def _select(start, end, a, b, target):
     return idx
 
 def generalized_schur_sort(a, b, q, z, target):
+    tgexc, = scipy.linalg.get_lapack_funcs(('tgexc',), (a, b,))
+
     n = a.shape[0]
+    for i in range(n):
+        if i > 0 and a[i, i - 1] != 0:
+            # Complex conjugate eigenpair
+            continue
 
-    try:
-        tgexc, = scipy.linalg.get_lapack_funcs(('tgexc',), (a, b,))
-        for i in range(n):
-            if i > 0 and a[i, i - 1] != 0:
-                # Complex conjugate eigenpair
-                continue
+        idx = _select(i, n, a, b, target)
 
-            idx = _select(i, n, a, b, target)
+        if idx == i:
+            continue
 
-            if idx == i:
-                continue
+        result = tgexc(a, b, q, z, idx + 1, i + 1)
+        assert result[-1] >= 0
 
-            if version.parse(scipy.version.short_version) < version.parse('1.10.0'):
-                result = tgexc(a, b, q, z, idx, i)
-            else:
-                result = tgexc(a, b, q, z, idx + 1, i + 1)
-            assert result[-1] >= 0
+        a = result[0]
+        b = result[1]
+        q = result[2]
+        z = result[3]
 
-            a = result[0]
-            b = result[1]
-            q = result[2]
-            z = result[3]
+        if result[-1] != 0:
+            break
 
-            if result[-1] != 0:
-                break
-
-        return a, b, q, z
-    except ValueError:
-        tgsen, = scipy.linalg.get_lapack_funcs(('tgsen',), (a, b,))
-        idx = _select(0, n, a, b, target)
-
-        select = numpy.zeros(n)
-        select[idx] = 1
-
-        result = tgsen(select, a, b, q, z, lwork=-1)
-        assert result[-1] == 0
-        lwork = result[-3][0].real.astype(numpy.int_) + 1
-
-        result = tgsen(select, a, b, q, z, lwork=lwork)
-        assert result[-1] == 0
-
-        return result[0], result[1], result[-9], result[-8]
+    return a, b, q, z
