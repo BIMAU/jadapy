@@ -38,7 +38,7 @@ def generate_test_matrix(shape, dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_smallest_magnitude(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -57,7 +57,7 @@ def test_jdqr_smallest_magnitude(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_smallest_magnitude_with_mass(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -77,7 +77,7 @@ def test_jdqr_smallest_magnitude_with_mass(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_largest_magnitude(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -96,7 +96,7 @@ def test_jdqr_largest_magnitude(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_largest_magnitude_with_mass(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -116,7 +116,7 @@ def test_jdqr_largest_magnitude_with_mass(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_smallest_real(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -135,7 +135,7 @@ def test_jdqr_smallest_real(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_largest_real(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -154,7 +154,7 @@ def test_jdqr_largest_real(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_smallest_imag(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -173,7 +173,7 @@ def test_jdqr_smallest_imag(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_smallest_imag_real(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -197,7 +197,7 @@ def test_jdqr_smallest_imag_real(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_largest_imag(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -216,7 +216,7 @@ def test_jdqr_largest_imag(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_largest_imag_real(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -240,7 +240,7 @@ def test_jdqr_largest_imag_real(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_target(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -260,7 +260,7 @@ def test_jdqr_target(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_target_real(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -285,7 +285,7 @@ def test_jdqr_target_real(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_prec(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -309,7 +309,7 @@ def test_jdqr_prec(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_prec_with_mass(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -334,7 +334,7 @@ def test_jdqr_prec_with_mass(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_largest_magnitude_lowdim(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -353,7 +353,7 @@ def test_jdqr_largest_magnitude_lowdim(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_largest_magnitude_lowdim_with_mass(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -373,7 +373,7 @@ def test_jdqr_largest_magnitude_lowdim_with_mass(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_smallest_magnitude_eigenvectors(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -404,7 +404,7 @@ def test_jdqr_smallest_magnitude_eigenvectors(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_smallest_magnitude_eigenvectors_with_mass(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -436,7 +436,7 @@ def test_jdqr_smallest_magnitude_eigenvectors_with_mass(dtype):
 
 @pytest.mark.parametrize('dtype', DTYPES)
 def test_jdqr_smallest_magnitude_initial_subspace(dtype):
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -481,7 +481,7 @@ def test_Epetra():
         pytest.skip("Trilinos not found")
 
     dtype = numpy.float64
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -511,7 +511,7 @@ def test_Epetra_lowdim():
         pytest.skip("Trilinos not found")
 
     dtype = numpy.float64
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
@@ -541,7 +541,7 @@ def test_Epetra_eigenvectors():
         pytest.skip("Trilinos not found")
 
     dtype = numpy.float64
-    numpy.random.seed(123)
+    numpy.random.seed(1234)
     tol = numpy.finfo(dtype).eps * 1e3
     atol = tol * 10
     n = 20
