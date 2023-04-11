@@ -45,14 +45,7 @@ def modified_gs(V, w, W=None, M=None, MV=None, MW=None):
             _proj(V, w, MV)
 
     if W is not None:
-        if len(W.shape) > 1:
-            for i in range(W.shape[1]):
-                if MW is not None:
-                    _proj(W[:, i:i+1], w, MW[:, i:i+1])
-                else:
-                    _proj(W[:, i:i+1], w)
-        else:
-            _proj(W, w, MW)
+        modified_gs(W, w, None, M, MW, None)
 
     return None
 
