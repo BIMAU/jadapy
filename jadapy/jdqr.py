@@ -1,4 +1,3 @@
-import sys
 import numpy
 import scipy
 
@@ -166,8 +165,7 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, lock_tol=None, M=N
             evs = scipy.linalg.eigvals(alpha)
             ev_est = evs[0]
             print("Step: %4d, subspace dimension: %3d, eigenvalue estimate: %13.6e + %13.6ei, residual norm: %e" %
-                  (it, m, ev_est.real, ev_est.imag, rnorm))
-            sys.stdout.flush()
+                  (it, m, ev_est.real, ev_est.imag, rnorm), flush=True)
 
             if rnorm <= lock_tol:
                 sort_target = ev_est
@@ -184,8 +182,7 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, lock_tol=None, M=N
 
                 # Store the converged eigenvalues
                 for i in range(nev):
-                    print("Found an eigenvalue:", evs[i])
-                    sys.stdout.flush()
+                    print("Found an eigenvalue:", evs[i], flush=True)
 
                     aconv[k] = evs[i]
                     k += 1
@@ -222,8 +219,7 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, lock_tol=None, M=N
             # Maximum search space dimension has been reached.
             new_m = min(subspace_dimensions[0], n - k)
 
-            print("Shrinking the search space from %d to %d" % (m, new_m))
-            sys.stdout.flush()
+            print("Shrinking the search space from %d to %d" % (m, new_m), flush=True)
 
             V[:, 0:new_m] = V[:, 0:m] @ U[:, 0:new_m]
             AV[:, 0:new_m] = AV[:, 0:m] @ U[:, 0:new_m]
