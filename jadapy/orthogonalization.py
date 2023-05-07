@@ -26,10 +26,13 @@ def DGKS(V, w, W=None, M=None, MV=None, MW=None):
     nrm = norm(w, M)
 
     eta = 1 / sqrt(2)
-    while nrm < eta * prev_nrm:
+    it = 0
+    maxit = 3
+    while nrm < eta * prev_nrm and it < maxit:
         gram_schmidt(V, w, W, M, MV, MW)
         prev_nrm = nrm
         nrm = norm(w, M)
+        it += 1
 
     return nrm
 
@@ -54,11 +57,15 @@ def repeated_mgs(V, w, W=None, M=None, MV=None, MW=None):
     modified_gs(V, w, W, M, MV, MW)
     nrm = norm(w, M)
 
+    it = 0
+    maxit = 3
+
     eta = 1 / sqrt(2)
-    while nrm < eta * prev_nrm:
+    while nrm < eta * prev_nrm and it < maxit:
         modified_gs(V, w, W, M, MV, MW)
         prev_nrm = nrm
         nrm = norm(w, M)
+        it += 1
 
     return nrm
 
