@@ -109,7 +109,7 @@ def orthogonalize(V, w, W=None, M=None, MV=None, MW=None, method='Repeated MGS',
     if M is not None and V is not None and MV is None:
         MV = M @ V
 
-    if M is not None and MW is not None and MW is None:
+    if M is not None and W is not None and MW is None:
         MW = M @ W
 
     # Orthogonalize with respect to the basis, not itself
