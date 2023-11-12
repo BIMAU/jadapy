@@ -41,16 +41,25 @@ def gram_schmidt(V, w, W=None, M=None, MV=None, MW=None):
     _proj(V, w, MV)
     _proj(W, w, MW)
 
-def DGKS(V, w, W=None, M=None, MV=None, MW=None):
-    prev_nrm = norm(w, M)
-    gram_schmidt(V, w, W, M, MV, MW)
+def DGKS(V, w, W=None, M=None, MV=None, MW=None, normalized=False, interface=None):
+    prev_nrm = None
     nrm = norm(w, M)
 
+    if normalized:
+        normalize(w, nrm, M, interface=interface)
+
     eta = 1 / sqrt(2)
-    while nrm < eta * prev_nrm:
+    while prev_nrm is None or nrm < eta * prev_nrm:
         gram_schmidt(V, w, W, M, MV, MW)
         prev_nrm = nrm
         nrm = norm(w, M)
+
+        if normalized:
+            normalize(w, nrm, M, interface=interface)
+            prev_nrm = 1
+
+    if normalized:
+        return 1
 
     return nrm
 
@@ -115,7 +124,7 @@ def orthogonalize(V, w, W=None, M=None, MV=None, MW=None, method='Repeated MGS',
     if method == 'Repeated Modified Gram-Schmidt' or method == 'Repeated MGS':
         return repeated_mgs(V, w, W, M, MV, MW, normalized, interface)
 
-    return DGKS(V, w, W, M, MV, MW)
+    return DGKS(V, w, W, M, MV, MW, normalized, interface)
 
 def orthonormalize(V, w=None, W=None, M=None, MV=None, MW=None, method='Repeated MGS', interface=None):
     if w is None:
