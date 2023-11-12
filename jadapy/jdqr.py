@@ -117,7 +117,7 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, lock_tol=None, M=N
                     A, prec, Q[:, 0:k+nev], Y[:, 0:k+nev], H[0:k+nev, 0:k+nev],
                     sigma, r[:, 0:nev], solver_tolerance, solver_maxit, interface)
 
-            orthonormalize(V[:, 0:m], V[:, m:m+nev], M=M, MV=None if MV is None else MV[:, 0:m])
+            orthonormalize(V[:, 0:m], V[:, m:m+nev], M=M, MV=None if MV is None else MV[:, 0:m], interface=interface)
 
         AV[:, m:m+nev] = A @ V[:, m:m+nev]
         if M is not None:
