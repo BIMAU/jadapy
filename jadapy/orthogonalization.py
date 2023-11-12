@@ -54,7 +54,7 @@ def DGKS(V, w, W=None, M=None, MV=None, MW=None):
 
     return nrm
 
-def modified_gs(V, w, W=None, M=None, MV=None, MW=None):
+def modified_gs(V, w, W=None, M=None, MV=None, MW=None, normalized=False, interface=None):
     if V is not None:
         if len(V.shape) > 1:
             for i in range(V.shape[1]):
@@ -67,6 +67,10 @@ def modified_gs(V, w, W=None, M=None, MV=None, MW=None):
 
     if W is not None:
         modified_gs(W, w, None, M, MW, None)
+
+    if normalized:
+        normalize(w, M=M, interface=interface)
+        return 1
 
     return None
 
@@ -106,7 +110,7 @@ def orthogonalize(V, w, W=None, M=None, MV=None, MW=None, method='Repeated MGS',
         return
 
     if method == 'Modified Gram-Schmidt' or method == 'MGS':
-        return modified_gs(V, w, W, M, MV, MW)
+        return modified_gs(V, w, W, M, MV, MW, normalized, interface)
 
     if method == 'Repeated Modified Gram-Schmidt' or method == 'Repeated MGS':
         return repeated_mgs(V, w, W, M, MV, MW, normalized, interface)
