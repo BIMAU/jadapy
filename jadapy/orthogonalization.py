@@ -4,6 +4,27 @@ from math import sqrt
 
 from jadapy.utils import dot, norm, eps
 
+def normalize(w, nrm=None, M=None, verbose=True, interface=None):
+    if nrm is None:
+        nrm = norm(w, M)
+
+    if verbose and nrm < eps(w):
+        if not interface:
+            raise Exception('Norm during normalization is nearly zero: %e' % nrm)
+        else:
+            warnings.warn('Warning: norm during normalization is nearly zero: %e. Taking a random vector.' % nrm)
+
+            if len(w.shape) > 1:
+                w[:, 0] = interface.random()
+            else:
+                w[:] = interface.random()
+
+            w /= norm(w, M)
+            return w
+
+    w /= nrm
+    return nrm
+
 def _proj(x, y, z=None):
     if x is None:
         return
@@ -49,41 +70,29 @@ def modified_gs(V, w, W=None, M=None, MV=None, MW=None):
 
     return None
 
-def repeated_mgs(V, w, W=None, M=None, MV=None, MW=None):
-    prev_nrm = norm(w, M)
-    modified_gs(V, w, W, M, MV, MW)
+def repeated_mgs(V, w, W=None, M=None, MV=None, MW=None, normalized=False, interface=None):
+    prev_nrm = None
     nrm = norm(w, M)
 
+    if normalized:
+        normalize(w, nrm, M, interface=interface)
+
     eta = 1 / sqrt(2)
-    while nrm < eta * prev_nrm:
+    while prev_nrm is None or nrm < eta * prev_nrm:
         modified_gs(V, w, W, M, MV, MW)
         prev_nrm = nrm
         nrm = norm(w, M)
 
+        if normalized:
+            normalize(w, nrm, M, interface=interface)
+            prev_nrm = 1
+
+    if normalized:
+        return 1
+
     return nrm
 
-def normalize(w, nrm=None, M=None, verbose=True, interface=None):
-    if nrm is None:
-        nrm = norm(w, M)
-
-    if verbose and nrm < eps(w):
-        if not interface:
-            raise Exception('Norm during normalization is nearly zero: %e' % nrm)
-        else:
-            warnings.warn('Warning: norm during normalization is nearly zero: %e. Taking a random vector.' % nrm)
-
-            if len(w.shape) > 1:
-                w[:, 0] = interface.random()
-            else:
-                w[:] = interface.random()
-
-            w /= norm(w, M)
-            return w
-
-    w /= nrm
-    return nrm
-
-def orthogonalize(V, w, W=None, M=None, MV=None, MW=None, method='Repeated MGS'):
+def orthogonalize(V, w, W=None, M=None, MV=None, MW=None, method='Repeated MGS', normalized=False, interface=None):
     if M is not None and V is not None and MV is None:
         MV = M @ V
 
@@ -93,14 +102,14 @@ def orthogonalize(V, w, W=None, M=None, MV=None, MW=None, method='Repeated MGS')
     # Orthogonalize with respect to the basis, not itself
     if len(w.shape) > 1 and w.shape[1] > 1:
         for i in range(w.shape[1]):
-            orthogonalize(V, w[:, i], W, M, MV, MW, method)
+            orthogonalize(V, w[:, i], W, M, MV, MW, method, normalized, interface)
         return
 
     if method == 'Modified Gram-Schmidt' or method == 'MGS':
         return modified_gs(V, w, W, M, MV, MW)
 
     if method == 'Repeated Modified Gram-Schmidt' or method == 'Repeated MGS':
-        return repeated_mgs(V, w, W, M, MV, MW)
+        return repeated_mgs(V, w, W, M, MV, MW, normalized, interface)
 
     return DGKS(V, w, W, M, MV, MW)
 
@@ -122,5 +131,5 @@ def orthonormalize(V, w=None, W=None, M=None, MV=None, MW=None, method='Repeated
             orthonormalize(V, w[:, i], w[:, 0:i], M, MV, MW, method, interface)
         return
 
-    nrm = orthogonalize(V, w, W, M, MV, MW, method)
+    nrm = orthogonalize(V, w, W, M, MV, MW, method, True, interface)
     normalize(w, nrm, M, interface=interface)
