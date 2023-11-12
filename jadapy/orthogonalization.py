@@ -59,11 +59,6 @@ def DGKS(V, w, W=None, M=None, MV=None, MW=None, normalized=False, interface=Non
             normalize(w, nrm, M, interface=interface)
             prev_nrm = 1
 
-    if normalized:
-        return 1
-
-    return nrm
-
 def modified_gs(V, w, W=None, M=None, MV=None, MW=None, normalized=False, interface=None):
     if V is not None:
         if len(V.shape) > 1:
@@ -80,9 +75,6 @@ def modified_gs(V, w, W=None, M=None, MV=None, MW=None, normalized=False, interf
 
     if normalized:
         normalize(w, M=M, interface=interface)
-        return 1
-
-    return None
 
 def repeated_mgs(V, w, W=None, M=None, MV=None, MW=None, normalized=False, interface=None):
     prev_nrm = None
@@ -100,11 +92,6 @@ def repeated_mgs(V, w, W=None, M=None, MV=None, MW=None, normalized=False, inter
         if normalized:
             normalize(w, nrm, M, interface=interface)
             prev_nrm = 1
-
-    if normalized:
-        return 1
-
-    return nrm
 
 def orthogonalize(V, w, W=None, M=None, MV=None, MW=None, method='Repeated MGS', normalized=False, interface=None):
     if M is not None and V is not None and MV is None:
@@ -127,7 +114,7 @@ def orthogonalize(V, w, W=None, M=None, MV=None, MW=None, method='Repeated MGS',
 
     return DGKS(V, w, W, M, MV, MW, normalized, interface)
 
-def orthonormalize(V, w=None, W=None, M=None, MV=None, MW=None, method='Repeated MGS', interface=None):
+def orthonormalize(V, w=None, M=None, MV=None, method='Repeated MGS', interface=None):
     if w is None:
         w = V
         V = None
@@ -136,14 +123,10 @@ def orthonormalize(V, w=None, W=None, M=None, MV=None, MW=None, method='Repeated
     if M is not None and V is not None and MV is None:
         MV = M @ V
 
-    if M is not None and W is not None and MW is None:
-        MW = M @ W
-
     # Orthonormalize with respect to the basis and itself
     if len(w.shape) > 1 and w.shape[1] > 1:
         for i in range(w.shape[1]):
-            orthonormalize(V, w[:, i], w[:, 0:i], M, MV, MW, method, interface)
+            orthogonalize(V, w[:, i], w[:, 0:i], M, MV, None, method, True, interface)
         return
 
-    nrm = orthogonalize(V, w, W, M, MV, MW, method, True, interface)
-    normalize(w, nrm, M, interface=interface)
+    orthogonalize(V, w, None, M, MV, None, method, True, interface)
