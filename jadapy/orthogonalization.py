@@ -119,7 +119,7 @@ def orthonormalize(V, w=None, W=None, M=None, MV=None, MW=None, method='Repeated
     # Orthonormalize with respect to the basis and itself
     if len(w.shape) > 1 and w.shape[1] > 1:
         for i in range(w.shape[1]):
-            orthonormalize(V, w[:, i], w[:, 0:i], M, MV, MW, method)
+            orthonormalize(V, w[:, i], w[:, 0:i], M, MV, MW, method, interface)
         return
 
     nrm = orthogonalize(V, w, W, M, MV, MW, method)
