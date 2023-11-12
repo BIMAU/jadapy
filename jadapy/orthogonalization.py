@@ -19,8 +19,9 @@ def normalize(w, nrm=None, M=None, verbose=True, interface=None):
             else:
                 w[:] = interface.random()
 
-            w /= norm(w, M)
-            return w
+            nrm = norm(w, M)
+            w /= nrm
+            return nrm
 
     w /= nrm
     return nrm
