@@ -1,8 +1,8 @@
-from numpy import float64
+from numpy import float32
 
-class Target(float64):
+class Target(float32):
     def __new__(cls, *args, **kwargs):
-        return float64.__new__(cls, *args, **kwargs)
+        return float32.__new__(cls, *args, **kwargs)
 
 
 SmallestMagnitude = Target(0.0)
