@@ -38,9 +38,34 @@ class NumPyInterface:
 
         out = x.copy()
         for i in range(x.shape[1]):
-            out[:, i], info = linalg.gmres(op, x[:, i], restart=100, maxiter=maxit, tol=tol, atol=0)
+            out[:, i], info, iterations = gmres(op, x[:, i], maxit, tol)
             if info < 0:
                 raise Exception('GMRES returned ' + str(info))
-            elif info > 0 and maxit > 1:
-                warnings.warn('GMRES did not converge in ' + str(info) + ' iterations')
+            elif info > 0 and maxit > 10:
+                warnings.warn('GMRES did not converge in ' + str(iterations) + ' iterations')
         return out
+
+
+def gmres(A, b, maxit, tol, restart=None, prec=None):
+    iterations = 0
+
+    def callback(_r):
+        nonlocal iterations
+        iterations += 1
+
+    if restart is None:
+        restart = min(maxit, 100)
+
+    maxiter = (maxit - 1) // restart + 1
+
+    try:
+        y, info = linalg.gmres(A, b, restart=restart, maxiter=maxiter,
+                               rtol=tol, atol=0, M=prec,
+                               callback=callback, callback_type='pr_norm')
+    except TypeError:
+        # Compatibility with SciPy <= 1.11
+        y, info = linalg.gmres(A, b, restart=restart, maxiter=maxiter,
+                               tol=tol, atol=0, M=prec,
+                               callback=callback, callback_type='pr_norm')
+
+    return y, info, iterations
