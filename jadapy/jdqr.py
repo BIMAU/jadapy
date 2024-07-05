@@ -104,7 +104,7 @@ def jdqr(A, num=5, target=Target.SmallestMagnitude, tol=1e-8, lock_tol=None, M=N
             # and as close to the target as possible
             if m < subspace_dimensions[0]:
                 solver_tolerance = 0.5
-                solver_maxit = 1
+                solver_maxit = 10
                 if target != 0.0:
                     sigma = target
 
